@@ -1,8 +1,10 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { NavDropdown } from "./nav-dropdown";
 import { NavUser } from "./nav-user";
 
@@ -10,6 +12,7 @@ const menuItems = [
   {
     name: "Home",
     href: "/home",
+    childs: [],
   },
   {
     name: "History Booking",
@@ -25,6 +28,8 @@ const user = {
 
 export const Header = () => {
   const [menuState, setMenuState] = React.useState(false);
+  const cartItemCount = 3; // Static cart items count
+
   return (
     <header>
       <nav
@@ -106,6 +111,21 @@ export const Header = () => {
               </div>
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 <NavUser user={user} />
+                <Link href={"/cart"}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-10 relative"
+                  >
+                    <ShoppingCart className="size-5" />
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs font-medium"
+                    >
+                      {cartItemCount}
+                    </Badge>
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
