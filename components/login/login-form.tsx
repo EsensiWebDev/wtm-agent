@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -112,12 +113,12 @@ export function LoginForm({
             {isPending ? "Logging in..." : "Login"}
           </Button>
 
-          <a
+          <Link
             href="/register"
             className="text-muted-foreground block text-center text-sm underline-offset-4 hover:underline"
           >
             Create New Account
-          </a>
+          </Link>
         </div>
       </form>
     </div>

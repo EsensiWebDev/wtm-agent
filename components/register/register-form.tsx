@@ -10,10 +10,12 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Card } from "../ui/card";
 
 export function RegisterForm({
   className,
@@ -90,7 +92,7 @@ export function RegisterForm({
     };
 
   return (
-    <div className={cn("w-full max-w-2xl space-y-8", className)} {...props}>
+    <div className={cn("w-full max-w-6xl space-y-8", className)} {...props}>
       <div className="text-center">
         <Image
           src="/hb_logo.png"
@@ -99,277 +101,259 @@ export function RegisterForm({
           height={144}
           className="mx-auto h-36 w-auto"
         />
-        <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-          Create your account
-        </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Join THE HOTEL BOX as an agent
-        </p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Personal Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">
-              Personal Information
-            </h3>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Left side - 2 columns for form fields */}
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* First Name, Last Name */}
+              <div>
+                <Label htmlFor="firstName">
+                  First Name<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Enter your first name"
+                  {...form.register("firstName")}
+                  disabled={isPending}
+                />
+                {form.formState.errors.firstName && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.firstName.message}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <Label htmlFor="firstName">
-                First Name<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="firstName"
-                type="text"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Enter your first name"
-                {...form.register("firstName")}
-                disabled={isPending}
-              />
-              {form.formState.errors.firstName && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.firstName.message}
-                </p>
-              )}
-            </div>
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Enter your last name"
+                  {...form.register("lastName")}
+                  disabled={isPending}
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                type="text"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Enter your last name"
-                {...form.register("lastName")}
-                disabled={isPending}
-              />
-            </div>
+              {/* Agent Company - Full Width */}
+              <div className="md:col-span-2">
+                <Label htmlFor="agentCompany">Agent Company</Label>
+                <Input
+                  id="agentCompany"
+                  type="text"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Enter your company name"
+                  {...form.register("agentCompany")}
+                  disabled={isPending}
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="agentCompany">Agent Company</Label>
-              <Input
-                id="agentCompany"
-                type="text"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Enter your company name"
-                {...form.register("agentCompany")}
-                disabled={isPending}
-              />
-            </div>
+              {/* Email, Phone Number */}
+              <div>
+                <Label htmlFor="email">
+                  Email<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="m@example.com"
+                  {...form.register("email")}
+                  disabled={isPending}
+                />
+                {form.formState.errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <Label htmlFor="email">
-                Email<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="m@example.com"
-                {...form.register("email")}
-                disabled={isPending}
-              />
-              {form.formState.errors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
+              <div>
+                <Label htmlFor="phoneNumber">
+                  Phone Number<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Enter your phone number"
+                  {...form.register("phoneNumber")}
+                  disabled={isPending}
+                />
+                {form.formState.errors.phoneNumber && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.phoneNumber.message}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <Label htmlFor="phoneNumber">
-                Phone Number<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Enter your phone number"
-                {...form.register("phoneNumber")}
-                disabled={isPending}
-              />
-              {form.formState.errors.phoneNumber && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.phoneNumber.message}
-                </p>
-              )}
+              {/* Username, KakaoTalk ID */}
+              <div>
+                <Label htmlFor="username">
+                  Username<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Choose a username"
+                  {...form.register("username")}
+                  disabled={isPending}
+                />
+                {form.formState.errors.username && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.username.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="kakaoTalkId">
+                  KakaoTalk ID<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="kakaoTalkId"
+                  type="text"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Enter your KakaoTalk ID"
+                  {...form.register("kakaoTalkId")}
+                  disabled={isPending}
+                />
+                {form.formState.errors.kakaoTalkId && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.kakaoTalkId.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password - Full Width */}
+              <div className="md:col-span-2">
+                <PasswordInput
+                  id="password"
+                  label="Password *"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Create a password"
+                  {...form.register("password")}
+                  disabled={isPending}
+                  error={form.formState.errors.password?.message}
+                />
+              </div>
+
+              {/* Confirm Password - Full Width */}
+              <div className="md:col-span-2">
+                <PasswordInput
+                  id="confirmPassword"
+                  label="Confirm Password *"
+                  className="mt-1 rounded bg-gray-200 text-black"
+                  placeholder="Confirm your password"
+                  {...form.register("confirmPassword")}
+                  disabled={isPending}
+                  error={form.formState.errors.confirmPassword?.message}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Account Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">
-              Account Information
-            </h3>
-
-            <div>
-              <Label htmlFor="username">
-                Username<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Choose a username"
-                {...form.register("username")}
-                disabled={isPending}
-              />
-              {form.formState.errors.username && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="kakaoTalkId">
-                KakaoTalk ID<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="kakaoTalkId"
-                type="text"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Enter your KakaoTalk ID"
-                {...form.register("kakaoTalkId")}
-                disabled={isPending}
-              />
-              {form.formState.errors.kakaoTalkId && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.kakaoTalkId.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <PasswordInput
-                id="password"
-                label="Password *"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Create a password"
-                {...form.register("password")}
-                disabled={isPending}
-                error={form.formState.errors.password?.message}
-              />
-            </div>
-
-            <div>
-              <PasswordInput
-                id="confirmPassword"
-                label="Confirm Password *"
-                className="mt-1 bg-gray-200 text-black"
-                placeholder="Confirm your password"
-                {...form.register("confirmPassword")}
-                disabled={isPending}
-                error={form.formState.errors.confirmPassword?.message}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Document Uploads */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">
-            Required Documents
-          </h3>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="agentSelfiePhoto">
-                Agent Selfie Photo<span className="text-red-500">*</span>
-              </Label>
-              <div className="mt-1">
-                <Input
-                  id="agentSelfiePhoto"
-                  type="file"
-                  accept="image/*"
-                  className="bg-gray-200 text-black"
-                  onChange={handleFileChange("agentSelfiePhoto")}
-                  disabled={isPending}
-                />
+          {/* Right side - 1 column for document uploads */}
+          <div className="space-y-6">
+            <Card className="h-full rounded px-6">
+              <div>
+                <Label htmlFor="agentSelfiePhoto">
+                  Agent Selfie Photo<span className="text-red-500">*</span>
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="agentSelfiePhoto"
+                    type="file"
+                    accept="image/*"
+                    className="bg-gray-200 text-black"
+                    onChange={handleFileChange("agentSelfiePhoto")}
+                    disabled={isPending}
+                  />
+                </div>
+                {form.formState.errors.agentSelfiePhoto && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.agentSelfiePhoto.message}
+                  </p>
+                )}
               </div>
-              {form.formState.errors.agentSelfiePhoto && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.agentSelfiePhoto.message}
-                </p>
-              )}
-            </div>
 
-            <div>
-              <Label htmlFor="identityCard">
-                Identity Card<span className="text-red-500">*</span>
-              </Label>
-              <div className="mt-1">
-                <Input
-                  id="identityCard"
-                  type="file"
-                  accept="image/*"
-                  className="bg-gray-200 text-black"
-                  onChange={handleFileChange("identityCard")}
-                  disabled={isPending}
-                />
+              <div>
+                <Label htmlFor="identityCard">
+                  Identity Card<span className="text-red-500">*</span>
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="identityCard"
+                    type="file"
+                    accept="image/*"
+                    className="bg-gray-200 text-black"
+                    onChange={handleFileChange("identityCard")}
+                    disabled={isPending}
+                  />
+                </div>
+                {form.formState.errors.identityCard && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.identityCard.message}
+                  </p>
+                )}
               </div>
-              {form.formState.errors.identityCard && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.identityCard.message}
-                </p>
-              )}
-            </div>
 
-            <div>
-              <Label htmlFor="certificate">Certificate</Label>
-              <div className="mt-1">
-                <Input
-                  id="certificate"
-                  type="file"
-                  accept="image/*"
-                  className="bg-gray-200 text-black"
-                  onChange={handleFileChange("certificate")}
-                  disabled={isPending}
-                />
+              <div>
+                <Label htmlFor="certificate">Certificate</Label>
+                <div className="mt-1">
+                  <Input
+                    id="certificate"
+                    type="file"
+                    accept="image/*"
+                    className="rounded bg-gray-200 text-black"
+                    onChange={handleFileChange("certificate")}
+                    disabled={isPending}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="nameCard">
-                Name Card<span className="text-red-500">*</span>
-              </Label>
-              <div className="mt-1">
-                <Input
-                  id="nameCard"
-                  type="file"
-                  accept="image/*"
-                  className="bg-gray-200 text-black"
-                  onChange={handleFileChange("nameCard")}
-                  disabled={isPending}
-                />
+              <div>
+                <Label htmlFor="nameCard">
+                  Name Card<span className="text-red-500">*</span>
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="nameCard"
+                    type="file"
+                    accept="image/*"
+                    className="rounded bg-gray-200 text-black"
+                    onChange={handleFileChange("nameCard")}
+                    disabled={isPending}
+                  />
+                </div>
+                {form.formState.errors.nameCard && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.nameCard.message}
+                  </p>
+                )}
               </div>
-              {form.formState.errors.nameCard && (
-                <p className="mt-1 text-sm text-red-600">
-                  {form.formState.errors.nameCard.message}
-                </p>
-              )}
-            </div>
+            </Card>
           </div>
         </div>
 
         <div className="space-y-4">
-          <Button type="submit" disabled={isPending} className="w-full">
+          <Button type="submit" disabled={isPending} className="rounded">
             {isPending && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Creating account..." : "Create Account"}
           </Button>
 
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Already have an account?{" "}
-            </span>
-            <a
-              href="/login"
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Sign in
-            </a>
-          </div>
+          <Link
+            href="/login"
+            className="ml-6 text-sm text-gray-600 hover:underline"
+          >
+            Already have an account?
+          </Link>
         </div>
       </form>
     </div>
