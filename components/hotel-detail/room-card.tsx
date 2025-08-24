@@ -1,3 +1,5 @@
+"use client";
+
 import type {
   RoomCardProps,
   RoomOption,
@@ -11,11 +13,16 @@ import {
 } from "@tabler/icons-react";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import RoomDetailsDialog from "./room-details-dialog";
 
 export function RoomCard({ name, images, options, features }: RoomCardProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const roomData = { name, images, options, features };
+
   return (
     <Card className="grid grid-cols-1 rounded px-4 py-6 lg:grid-cols-10 lg:px-6">
       <h2 className="col-span-full mb-4 text-xl font-bold lg:mb-0">{name}</h2>
@@ -25,14 +32,21 @@ export function RoomCard({ name, images, options, features }: RoomCardProps) {
           <RoomOptions options={options} />
           <RoomFeatures features={features} />
           <div className="mt-2">
-            <Link
-              href="#"
-              className="inline-flex items-center text-xs text-blue-600 hover:underline"
+            <button
+              onClick={() => setIsDialogOpen(true)}
+              className="inline-flex items-center text-xs hover:underline"
             >
               See Room Details & Benefits
               <ChevronRight size={14} className="ml-1" />
-            </Link>
+            </button>
           </div>
+
+          <RoomDetailsDialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+            room={roomData}
+            showThumbnails={true}
+          />
         </div>
       </div>
     </Card>
