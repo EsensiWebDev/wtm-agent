@@ -123,6 +123,22 @@ export const Header = () => {
               </button>
 
               <div className="flex items-center gap-3">
+                <Link href={"/cart"}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative size-10"
+                  >
+                    <ShoppingCart className="size-5" />
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs font-medium"
+                    >
+                      {cartItemCount}
+                    </Badge>
+                  </Button>
+                </Link>
+
                 {/* Notification Popover */}
                 <Popover>
                   <PopoverTrigger asChild>
@@ -196,21 +212,6 @@ export const Header = () => {
                   </PopoverContent>
                 </Popover>
 
-                <Link href={"/cart"}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative size-10"
-                  >
-                    <ShoppingCart className="size-5" />
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs font-medium"
-                    >
-                      {cartItemCount}
-                    </Badge>
-                  </Button>
-                </Link>
                 <NavUser user={user} />
               </div>
             </div>
