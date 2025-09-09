@@ -24,8 +24,9 @@ import {
   CirclePercent,
   MapPin,
   Users,
+  Search,
 } from "lucide-react";
-import Link from "next/link";
+
 import {
   createParser,
   parseAsInteger,
@@ -43,6 +44,13 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command";
+import { Input } from "../ui/input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 
 const SearchFilter = () => {
   return (
@@ -319,37 +327,120 @@ const GuestCounter = () => {
   );
 };
 
-// Mock promo hotels data
-const promoHotels = [
+// Mock promo data with hotels
+const promoData = [
   {
     id: 1,
-    name: "Ibis Hotel & Convention Bali",
-    roomType: "Business Suite Room for 2 Nights",
-    location: "Bali",
+    code: "PAYDAY15",
+    title: "Payday Sale | Free Breakfast",
+    description: "Get free breakfast with selected hotels",
+    hotels: [
+      {
+        id: 1,
+        name: "Ibis Hotel & Convention Bali",
+        roomType: "Business Suite Room for 2 Nights",
+        location: "Bali",
+      },
+      {
+        id: 2,
+        name: "Sheraton Bali",
+        roomType: "Deluxe Ocean View for 3 Nights",
+        location: "Bali",
+      },
+      {
+        id: 3,
+        name: "JW Marriott Bali",
+        roomType: "Premium Room for 2 Nights",
+        location: "Bali",
+      },
+    ],
   },
   {
     id: 2,
-    name: "Atria Hotel Bali",
-    roomType: "Twin Room for 2 Nights",
-    location: "Bali",
+    code: "TWIN20",
+    title: "9.9 Twin Date | 20% OFF!",
+    description: "Special twin date promotion with 20% discount",
+    hotels: [
+      {
+        id: 4,
+        name: "Atria Hotel Bali",
+        roomType: "Twin Room for 2 Nights",
+        location: "Bali",
+      },
+      {
+        id: 5,
+        name: "Grand Hyatt Jakarta",
+        roomType: "Twin Deluxe Room for 3 Nights",
+        location: "Jakarta",
+      },
+    ],
   },
   {
     id: 3,
-    name: "Grand Hyatt Jakarta",
-    roomType: "Deluxe Room for 3 Nights",
-    location: "Jakarta",
+    code: "INDEPENDENCE",
+    title: "Independence Day | Free Upgrade to Suite Room",
+    description: "Celebrate independence with free room upgrades",
+    hotels: [
+      {
+        id: 6,
+        name: "Shangri-La Surabaya",
+        roomType: "Executive Suite for 2 Nights",
+        location: "Surabaya",
+      },
+      {
+        id: 7,
+        name: "The Ritz-Carlton Jakarta",
+        roomType: "Club Level Suite for 3 Nights",
+        location: "Jakarta",
+      },
+    ],
   },
   {
     id: 4,
-    name: "Shangri-La Surabaya",
-    roomType: "Executive Suite for 2 Nights",
-    location: "Surabaya",
+    code: "SEPTEMBER500",
+    title: "September Promo | 500,000 IDR OFF!",
+    description: "Massive savings this September",
+    hotels: [
+      {
+        id: 8,
+        name: "Conrad Bali",
+        roomType: "Ocean View Suite for 4 Nights",
+        location: "Bali",
+      },
+      {
+        id: 9,
+        name: "Four Seasons Jakarta",
+        roomType: "Premier Room for 2 Nights",
+        location: "Jakarta",
+      },
+    ],
   },
 ];
 
 const PromoButton = () => {
   const [open, setOpen] = useState(false);
-  const [filteredHotels, setFilteredHotels] = useState(promoHotels);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPromo, setSelectedPromo] = useQueryState(
+    "promo",
+    parseAsString,
+  );
+
+  // Filter promos based on search term
+  const filteredPromos = promoData.filter(
+    (promo) =>
+      promo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      promo.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      promo.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const handlePromoSelect = (promoCode: string) => {
+    setSelectedPromo(promoCode);
+    setOpen(false);
+    toast.success("Promo applied!", {
+      description: `Promo code ${promoCode} has been applied to your search.`,
+      duration: 3000,
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -359,44 +450,70 @@ const PromoButton = () => {
           Find Your Promo
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80vh] overflow-y-auto bg-white sm:max-w-[600px]">
+      <DialogContent className="max-h-[80vh] overflow-y-auto bg-white sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
             Find Your Promo
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          {/* Promo Code Input */}
-          <div className="space-y-2">
-            <div className="rounded-lg bg-gray-100 p-3">
-              <p className="text-sm font-medium text-gray-700">
-                Code: PROMOWTM15
-              </p>
-            </div>
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search promo code here..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
 
-          {/* Hotel List */}
-          <div className="space-y-4">
-            {filteredHotels.length > 0 ? (
-              filteredHotels.map((hotel) => (
-                <div
-                  key={hotel.id}
-                  className="rounded-lg p-4 transition-shadow hover:shadow-md"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold">{hotel.name}</h3>
-                      <p className="text-sm text-gray-600">{hotel.roomType}</p>
+          {/* Promo Accordion List */}
+          <div className="space-y-2">
+            {filteredPromos.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {filteredPromos.map((promo) => (
+                  <AccordionItem key={promo.id} value={`promo-${promo.id}`}>
+                    <div className="flex items-center justify-between py-4">
+                      <AccordionTrigger className="flex-1 text-left hover:no-underline">
+                        <div className="mr-2 flex flex-col items-start">
+                          <h3 className="text-lg font-semibold">
+                            {promo.title}
+                          </h3>
+                        </div>
+                      </AccordionTrigger>
+                      <Button
+                        size="sm"
+                        onClick={() => handlePromoSelect(promo.code)}
+                        className="ml-4 shrink-0"
+                        disabled={selectedPromo === promo.code}
+                      >
+                        {selectedPromo === promo.code ? "Selected" : "Select"}
+                      </Button>
                     </div>
-                    <Link href="/hotel-detail">
-                      <Button className="px-6 py-2 text-white">Select</Button>
-                    </Link>
-                  </div>
-                </div>
-              ))
+                    <AccordionContent>
+                      {/* Hotels in this promo */}
+                      <div className="space-y-1">
+                        {promo.hotels.map((hotel) => (
+                          <h5
+                            key={`${promo.id}-${hotel.id}`}
+                            className="text-muted-foreground"
+                          >
+                            {hotel.name}
+                          </h5>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             ) : (
               <div className="py-8 text-center text-gray-500">
-                <p>No hotels found for the entered promo code.</p>
+                <CirclePercent className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+                <p className="text-lg font-medium">No promos found</p>
+                <p className="text-sm">
+                  Try searching with different keywords.
+                </p>
               </div>
             )}
           </div>
