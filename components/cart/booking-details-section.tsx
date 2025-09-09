@@ -17,7 +17,7 @@ import Image from "next/image";
 import React, { useTransition } from "react";
 import { toast } from "sonner";
 import { useGuests } from "./guest-context";
-import { IconMoon } from "@tabler/icons-react";
+import { IconMoon, IconRosetteDiscount } from "@tabler/icons-react";
 
 interface BookingDetailsSectionProps {
   bookingDetailsList: BookingDetail[];
@@ -53,6 +53,15 @@ interface HotelRoomCardProps {
 const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
   const [isPending, startTransition] = useTransition();
   const { guestNames } = useGuests();
+
+  // Sample coupon data - in real app this would come from props or API
+  const couponDiscount = {
+    code: "3D2NIGHT15",
+    percentage: 15,
+    amount: Math.floor(bookingDetails.totalPrice * 0.15),
+  };
+
+  const discountedPrice = bookingDetails.totalPrice - couponDiscount.amount;
 
   const onRemove = async () => {
     startTransition(async () => {
@@ -230,33 +239,47 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
             </Select>
           </div>
         </div>
-        <CardFooter className="grid grid-cols-1 bg-gray-200 px-6 py-4 md:grid-cols-3">
-          <div className="col-span-1 md:col-span-2">
-            <div className="text-sm leading-relaxed font-medium">
-              Total Room Price
+        <CardFooter className="bg-gray-200 px-6 py-4">
+          <div className="flex w-full flex-col gap-1">
+            {/* First row: Total Room Price and line-through price */}
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-gray-800">
+                Total Room Price
+              </div>
+              {bookingDetails.id === "booking-2" && (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 rounded-full bg-gray-700 px-3 py-1 text-xs font-medium text-white">
+                    <IconRosetteDiscount className="h-4 w-4" />
+                    {couponDiscount.code}
+                  </div>
+                  <div className="text-sm text-gray-500 line-through">
+                    {formatPrice(bookingDetails.totalPrice)}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="text-xs font-extralight">
-              {bookingDetails.rooms.reduce(
-                (total, room) => total + room.quantity,
-                0,
-              )}{" "}
-              room(s),{" "}
-              {Math.max(
-                1,
-                Math.ceil(
-                  (+bookingDetails.checkOut - +bookingDetails.checkIn) /
-                    (1000 * 60 * 60 * 24),
-                ),
-              )}{" "}
-              night
-              {bookingDetails.additionalServices.length > 0 &&
-                ` + ${bookingDetails.additionalServices.map((s) => s.name).join(", ")}`}
+
+            {/* Second row: Room/night details and discounted price */}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                {bookingDetails.rooms.reduce(
+                  (total, room) => total + room.quantity,
+                  0,
+                )}{" "}
+                room(s),{" "}
+                {Math.max(
+                  1,
+                  Math.ceil(
+                    (+bookingDetails.checkOut - +bookingDetails.checkIn) /
+                      (1000 * 60 * 60 * 24),
+                  ),
+                )}{" "}
+                night
+              </div>
+              <div className="text-lg font-bold text-gray-800">
+                {formatPrice(discountedPrice)}
+              </div>
             </div>
-          </div>
-          <div className="flex h-full text-sm md:flex-col md:justify-end">
-            <span className="text-right font-medium">
-              {formatPrice(bookingDetails.totalPrice)}
-            </span>
           </div>
         </CardFooter>
       </Card>
@@ -290,6 +313,14 @@ const BookingGrandTotalCard = ({
     (sum, b) => sum + b.totalPrice,
     0,
   );
+
+  // Calculate total discount across all bookings
+  const totalDiscount = bookingDetailsList.reduce(
+    (sum, booking) => sum + Math.floor(booking.totalPrice * 0.15),
+    0,
+  );
+
+  const discountedGrandTotal = grandTotal - totalDiscount;
 
   return (
     <div className="md:col-span-2 md:col-end-6">
@@ -329,7 +360,7 @@ const BookingGrandTotalCard = ({
           </div>
           <div className="flex h-full md:flex-col md:justify-end">
             <span className="text-right text-lg font-bold">
-              {formatPrice(grandTotal)}
+              {formatPrice(discountedGrandTotal)}
             </span>
           </div>
         </CardFooter>
