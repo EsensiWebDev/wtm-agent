@@ -1,4 +1,8 @@
 export function formatCurrency(nominal: number, currency = "IDR"): string {
+  if (currency === "IDR") {
+    return `Rp. ${new Intl.NumberFormat("id-ID").format(nominal)}`;
+  }
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency,
@@ -8,7 +12,7 @@ export function formatCurrency(nominal: number, currency = "IDR"): string {
 
 export function formatDate(
   date: Date | string | number | undefined,
-  opts: Intl.DateTimeFormatOptions = {}
+  opts: Intl.DateTimeFormatOptions = {},
 ) {
   if (!date) return "";
 

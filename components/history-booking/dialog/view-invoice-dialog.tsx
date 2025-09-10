@@ -394,37 +394,41 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
 
           {/* Total Section */}
           <div className="flex justify-end">
-            <div className="w-full max-w-sm space-y-2">
-              <div className="flex items-start justify-between border-b pb-2">
-                <div>
-                  <span className="text-lg font-medium text-gray-900">
-                    Total Room Price
-                  </span>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {invoiceData.numberOfGuests} room(s),{" "}
-                    {invoiceData.numberOfNights} night
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="mb-1 flex items-center justify-end gap-2">
-                    <span className="flex items-center gap-1 rounded-full bg-gray-800 px-3 py-1 text-xs font-medium text-white">
-                      <IconRosetteDiscount size={14} />
-                      3D2NIGHT15
-                    </span>
-                    <span className="text-sm text-gray-500 line-through">
-                      {formatCurrency(
-                        invoiceData.subtotal + invoiceData.serviceFee,
-                        invoiceData.currency,
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(
-                      invoiceData.totalAmount,
-                      invoiceData.currency,
-                    )}
-                  </p>
-                </div>
+            <div className="w-full max-w-sm">
+              {/* First row: Total Room Price and Price Through */}
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-medium text-gray-900">
+                  Total Room Price
+                </span>
+                <span className="text-sm text-gray-500 line-through">
+                  {formatCurrency(
+                    invoiceData.subtotal + invoiceData.serviceFee,
+                    invoiceData.currency,
+                  )}
+                </span>
+              </div>
+
+              {/* Second row: Room/Night info and Total price */}
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  {invoiceData.numberOfGuests} room(s),{" "}
+                  {invoiceData.numberOfNights} night
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(
+                    invoiceData.totalAmount,
+                    invoiceData.currency,
+                  )}
+                </p>
+              </div>
+
+              {/* Third row: Voucher code */}
+              <div className="flex justify-end">
+                <span className="bg-primary flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-white">
+                  Promo
+                  <IconRosetteDiscount className="h-4 w-4" />
+                  September Promo | {formatCurrency(500000, "IDR")} Off!
+                </span>
               </div>
             </div>
           </div>
@@ -433,6 +437,8 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
           <div className="mb-4 border-b pt-8 pb-4">
             <p className="text-sm text-gray-600">
               Payment and cancellation policy as per contract.
+              <br />
+              *terms & condition applied
             </p>
           </div>
         </div>
