@@ -158,7 +158,7 @@ export const Header = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0" align="end">
+                  <PopoverContent className="w-80 p-0" align="start">
                     <div className="border-b p-4">
                       <h3 className="text-lg font-semibold text-gray-900">
                         Notification
