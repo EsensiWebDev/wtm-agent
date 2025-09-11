@@ -95,11 +95,11 @@ export function RegisterForm({
     <div className={cn("w-full max-w-6xl space-y-8", className)} {...props}>
       <div className="text-center">
         <Image
-          src="/hb_logo.png"
+          src="/hb_text.png"
           alt="THE HOTEL BOX Logo"
           width={144}
           height={144}
-          className="mx-auto h-36 w-auto"
+          className="mx-auto h-11 w-auto"
         />
       </div>
 

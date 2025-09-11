@@ -205,7 +205,7 @@ export const Header = () => {
                           onClick={markAllAsRead}
                           className="w-full bg-gray-800 text-white hover:bg-gray-700"
                         >
-                          Mark As Read
+                          Mark All As Read
                         </Button>
                       </div>
                     )}
