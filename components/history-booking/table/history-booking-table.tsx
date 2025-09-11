@@ -19,7 +19,7 @@ interface HistoryBookingTableProps {
         ReturnType<
           typeof import("@/app/(protected)/history-booking/fetch").getData
         >
-      >
+      >,
     ]
   >;
 }
@@ -30,12 +30,20 @@ const HistoryBookingTable = ({ promises }: HistoryBookingTableProps) => {
   const [rowAction, setRowAction] =
     React.useState<DataTableRowAction<HistoryBooking> | null>(null);
 
+  const handleViewInvoice = (booking: HistoryBooking) => {
+    setRowAction({ variant: "invoice", row: { original: booking } } as any);
+  };
+
+  const handleViewReceipt = (booking: HistoryBooking) => {
+    setRowAction({ variant: "receipt", row: { original: booking } } as any);
+  };
+
   const columns = React.useMemo(
     () =>
       getHistoryBookingTableColumns({
         setRowAction,
       }),
-    []
+    [],
   );
 
   const { table } = useDataTable({
