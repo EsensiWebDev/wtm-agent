@@ -19,6 +19,10 @@ const menuItems = [
     name: "History Booking",
     href: "/history-booking",
   },
+  {
+    name: "Contact Us",
+    href: "/contact-us",
+  },
 ];
 
 const user = {
