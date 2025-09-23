@@ -35,9 +35,10 @@ import { toast } from "sonner";
 interface ContactUsFormProps {
   userAccount: UserAccountData;
   bookingOptions: BookingOption[];
+  initialBookingId?: string;
 }
 
-const ContactUsForm = ({ userAccount, bookingOptions }: ContactUsFormProps) => {
+const ContactUsForm = ({ userAccount, bookingOptions, initialBookingId }: ContactUsFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingOption | null>(
     null,
@@ -49,9 +50,9 @@ const ContactUsForm = ({ userAccount, bookingOptions }: ContactUsFormProps) => {
       name: userAccount.name,
       email: userAccount.email,
       subject: "",
-      inquiryType: "general",
+      inquiryType: initialBookingId ? "booking" : "general",
       message: "",
-      bookingId: "",
+      bookingId: initialBookingId || "",
       subBookingId: "",
     },
   });

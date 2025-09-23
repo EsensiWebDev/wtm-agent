@@ -19,7 +19,7 @@ export async function fetchUserBookings(): Promise<BookingOption[]> {
 
   return [
     {
-      value: "BK001",
+      value: "BK-001",
       label: "Hotel Bali Paradise - Booking #BK001",
       subBookings: [
         { value: "SUB001", label: "Deluxe Room - Check-in: 2024-01-15" },
@@ -28,7 +28,7 @@ export async function fetchUserBookings(): Promise<BookingOption[]> {
       ],
     },
     {
-      value: "BK002",
+      value: "BK-002",
       label: "Hotel Jakarta Grand - Booking #BK002",
       subBookings: [
         { value: "SUB004", label: "Executive Suite - Check-in: 2024-02-10" },
@@ -36,7 +36,7 @@ export async function fetchUserBookings(): Promise<BookingOption[]> {
       ],
     },
     {
-      value: "BK003",
+      value: "BK-003",
       label: "Hotel Yogyakarta Heritage - Booking #BK003",
       subBookings: [
         { value: "SUB006", label: "Standard Room - Check-in: 2024-03-05" },
@@ -46,7 +46,7 @@ export async function fetchUserBookings(): Promise<BookingOption[]> {
       ],
     },
     {
-      value: "BK004",
+      value: "BK-004",
       label: "Hotel Bandung Hills - Booking #BK004",
       subBookings: [
         { value: "SUB010", label: "Mountain View Room - Check-in: 2024-04-20" },
