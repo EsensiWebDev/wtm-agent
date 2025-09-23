@@ -89,7 +89,7 @@ export function getHistoryBookingTableColumns({
         switch (status) {
           case "approved":
             color = "bg-green-100 text-green-700 border-green-200";
-            label = "Approved";
+            label = "Confirmed";
             break;
           case "waiting":
             color = "bg-yellow-100 text-yellow-700 border-yellow-200";
@@ -99,7 +99,11 @@ export function getHistoryBookingTableColumns({
             color = "bg-red-100 text-red-700 border-red-200";
             label = "Rejected";
         }
-        return <Badge className={`border font-medium ${color}`}>{label}</Badge>;
+        return (
+          <Badge
+            className={`border font-medium ${color}`}
+          >{`2 of 2 ${label}`}</Badge>
+        );
       },
       enableHiding: false,
       meta: {
