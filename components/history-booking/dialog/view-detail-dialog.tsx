@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -35,6 +36,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import ViewInvoiceDialog from "./view-invoice-dialog";
 import ViewReceiptDialog from "./view-receipt-dialog";
+import Link from "next/link";
 
 // Helper function to get invoice count for a booking
 function getInvoiceCount(booking: HistoryBooking): number {
@@ -51,16 +53,12 @@ interface ViewDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   booking: HistoryBooking | null;
-  onViewInvoice?: (booking: HistoryBooking) => void;
-  onViewReceipt?: (booking: HistoryBooking) => void;
 }
 
 const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
   open,
   onOpenChange,
   booking,
-  onViewInvoice,
-  onViewReceipt,
 }) => {
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
@@ -288,6 +286,22 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-center gap-2 py-2">
+                <Button asChild>
+                  <Link href={`/contact-us?bookingId=${booking?.bookingId}`}>
+                    Inquire This Booking
+                  </Link>
+                </Button>
+
+                <DialogClose asChild>
+                  <Button
+                    variant={"secondary"}
+                    className="border-primary border"
+                  >
+                    Cancel
+                  </Button>
+                </DialogClose>
+              </div>
             </div>
           </div>
         ) : (
@@ -318,7 +332,6 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
         onConfirm={handleCancelConfirm}
         onCancel={handleCancelDialogClose}
         isLoading={isLoading}
-        
         title={`Are you sure you want to cancel booking ${booking?.bookingId}?`}
         description={`This action cannot be undone and the booking will be permanently cancelled.`}
       />
