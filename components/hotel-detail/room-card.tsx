@@ -24,6 +24,13 @@ import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import RoomDetailsDialog from "./room-details-dialog";
 
 export interface ExtendedRoomCardProps extends RoomCardProps {
@@ -38,15 +45,196 @@ interface Promo {
   discount: number; // percentage
 }
 
+// Add interface for the confirmation dialog props
+interface ConfirmationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  isLoading: boolean; // Add loading state prop
+  roomData: {
+    hotelName: string;
+    roomName: string;
+    selectedOption: RoomOption;
+    quantity: number;
+    selectedAdditionals: Record<string, boolean>;
+    additionalServices: AdditionalService[];
+    promoCode: string | null;
+    totalPrice: number;
+    roomTotal: number;
+    servicesTotal: number;
+    discount: number;
+  };
+}
+
+// Add the confirmation dialog component
+function AddToCartConfirmationDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  isLoading,
+  roomData,
+}: ConfirmationDialogProps) {
+  const {
+    hotelName,
+    roomName,
+    selectedOption,
+    quantity,
+    selectedAdditionals,
+    additionalServices,
+    promoCode,
+    totalPrice,
+    roomTotal,
+    servicesTotal,
+    discount,
+  } = roomData;
+
+  // Get selected additional services
+  const selectedServices = additionalServices.filter(
+    (service) => selectedAdditionals[service.id],
+  );
+
+  // Get current date for display (in a real app, this would come from a date picker)
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md bg-white">
+        <DialogHeader>
+          <DialogTitle>Confirm Booking</DialogTitle>
+          <DialogDescription>
+            Please review your booking details
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="border-t border-gray-200 pt-4">
+          <div className="flex justify-between">
+            <div>
+              <h4 className="font-medium">{hotelName}</h4>
+              <p className="text-sm text-gray-600">{roomName}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-medium">Check-in Date</p>
+              <p className="text-sm text-gray-600">{currentDate}</p>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-lg bg-gray-50 p-4">
+            <div className="flex justify-between">
+              <div>
+                <p className="font-medium">{selectedOption.label}</p>
+                {selectedOption.includes && (
+                  <p className="text-sm text-gray-600">
+                    {selectedOption.includes}
+                  </p>
+                )}
+              </div>
+              <p className="font-medium">
+                Rp {selectedOption.price.toLocaleString("id-ID")}
+              </p>
+            </div>
+
+            <div className="mt-2 flex justify-between text-sm">
+              <span>Quantity:</span>
+              <span>
+                {quantity} room{quantity > 1 ? "s" : ""}
+              </span>
+            </div>
+
+            <div className="mt-2 flex justify-between font-medium">
+              <span>Room Total:</span>
+              <span>Rp {roomTotal.toLocaleString("id-ID")}</span>
+            </div>
+          </div>
+
+          {selectedServices.length > 0 && (
+            <div className="mt-4">
+              <h4 className="font-medium">Additional Services</h4>
+              <div className="mt-2 space-y-2">
+                {selectedServices.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex justify-between text-sm"
+                  >
+                    <span>{service.label}</span>
+                    <span>Rp {service.price.toLocaleString("id-ID")}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-medium">
+                  <span>Services Total:</span>
+                  <span>Rp {servicesTotal.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {promoCode && (
+            <div className="mt-4">
+              <div className="flex justify-between">
+                <span>Promo Code:</span>
+                <span className="font-medium text-green-600">{promoCode}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Discount:</span>
+                <span className="font-medium text-green-600">
+                  -Rp {discount.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="flex justify-between text-lg font-semibold">
+              <span>Total:</span>
+              <span>Rp {totalPrice.toLocaleString("id-ID")}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1"
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onConfirm}
+            className="flex-1 bg-slate-800 hover:bg-slate-700"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Adding to Cart...
+              </>
+            ) : (
+              "Confirm & Add to Cart"
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function RoomCard({
   name,
   images,
   options,
   features,
   additionals,
-  hotelName = "Grand Hotel", // Default fallback
+  hotelName = "Grand Hotel",
 }: ExtendedRoomCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] =
+    useState(false);
   const [selectedOption, setSelectedOption] = useState<number>(0);
   const [roomQuantity, setRoomQuantity] = useState(1);
   const [selectedAdditionals, setSelectedAdditionals] = useState<
@@ -93,7 +281,42 @@ export default function RoomCard({
     setSelectedPromo(promoId);
   };
 
+  // Calculate pricing information
+  const calculatePricing = () => {
+    const roomTotal = options[selectedOption].price * roomQuantity;
+
+    const selectedServices = (additionals || []).filter(
+      (service) => selectedAdditionals[service.id],
+    );
+
+    const servicesTotal = selectedServices.reduce(
+      (sum, service) => sum + service.price,
+      0,
+    );
+
+    // Calculate discount
+    let discount = 0;
+    const promo = availablePromos.find((p) => p.id === selectedPromo);
+    if (promo) {
+      discount = (roomTotal * promo.discount) / 100;
+    }
+
+    const totalPrice = roomTotal + servicesTotal - discount;
+
+    return {
+      roomTotal,
+      servicesTotal,
+      discount,
+      totalPrice,
+    };
+  };
+
   const handleAddToCart = () => {
+    // Open confirmation dialog instead of directly adding to cart
+    setIsConfirmationDialogOpen(true);
+  };
+
+  const handleConfirmAddToCart = () => {
     startTransition(async () => {
       // Find the selected promo object
       const promo = availablePromos.find((p) => p.id === selectedPromo) || null;
@@ -111,6 +334,12 @@ export default function RoomCard({
       const result = await addRoomToCart(cartData);
 
       if (result.success) {
+        // Reset form to default values after successful submission
+        resetForm();
+
+        // Close confirmation dialog
+        setIsConfirmationDialogOpen(false);
+
         toast.success(result.message, {
           action: {
             label: "View Cart",
@@ -119,10 +348,23 @@ export default function RoomCard({
           duration: 5000,
         });
       } else {
+        // Close confirmation dialog
+        setIsConfirmationDialogOpen(false);
+
         toast.error(result.message);
       }
     });
   };
+
+  // Function to reset form to default values
+  const resetForm = () => {
+    setSelectedOption(0);
+    setRoomQuantity(1);
+    setSelectedAdditionals({});
+    setSelectedPromo(null);
+  };
+
+  const { roomTotal, servicesTotal, discount, totalPrice } = calculatePricing();
 
   return (
     <Card className="overflow-hidden rounded-lg bg-white shadow-sm">
@@ -215,6 +457,28 @@ export default function RoomCard({
           onOpenChange={setIsDialogOpen}
           room={roomData}
           showThumbnails={true}
+        />
+
+        {/* Add confirmation dialog */}
+        <AddToCartConfirmationDialog
+          open={isConfirmationDialogOpen}
+          onOpenChange={setIsConfirmationDialogOpen}
+          onConfirm={handleConfirmAddToCart}
+          isLoading={isPending} // Pass the loading state
+          roomData={{
+            hotelName,
+            roomName: name,
+            selectedOption: options[selectedOption],
+            quantity: roomQuantity,
+            selectedAdditionals,
+            additionalServices: additionals || [],
+            promoCode:
+              availablePromos.find((p) => p.id === selectedPromo)?.code || null,
+            totalPrice,
+            roomTotal,
+            servicesTotal,
+            discount,
+          }}
         />
       </div>
     </Card>
