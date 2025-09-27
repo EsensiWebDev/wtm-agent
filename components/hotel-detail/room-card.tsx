@@ -19,6 +19,7 @@ import {
 import { ChevronRight, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -63,6 +64,7 @@ interface ConfirmationDialogProps {
     roomTotal: number;
     servicesTotal: number;
     discount: number;
+    numberOfNights: number;
   };
 }
 
@@ -86,6 +88,7 @@ function AddToCartConfirmationDialog({
     roomTotal,
     servicesTotal,
     discount,
+    numberOfNights,
   } = roomData;
 
   // Get selected additional services
@@ -93,8 +96,25 @@ function AddToCartConfirmationDialog({
     (service) => selectedAdditionals[service.id],
   );
 
-  // Get current date for display (in a real app, this would come from a date picker)
-  const currentDate = new Date().toLocaleDateString("en-US", {
+  // Get date parameters from URL
+  const [from] = useQueryState("from", parseAsString);
+  const [to] = useQueryState("to", parseAsString);
+
+  // Parse dates
+  const checkinDate = from ? new Date(from) : new Date();
+  const checkoutDate = to
+    ? new Date(to)
+    : new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000); // Default to tomorrow
+
+  // Format dates for display
+  const formattedCheckinDate = checkinDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const formattedCheckoutDate = checkoutDate.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -113,14 +133,22 @@ function AddToCartConfirmationDialog({
 
         <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-between">
-            <div>
-              <h4 className="font-medium">{hotelName}</h4>
-              <p className="text-sm text-gray-600">{roomName}</p>
-            </div>
-            <div className="text-right">
-              <p className="font-medium">Check-in Date</p>
-              <p className="text-sm text-gray-600">{currentDate}</p>
-            </div>
+            <h4 className="font-medium">{hotelName}</h4>
+            <p className="text-sm text-gray-600">{roomName}</p>
+          </div>
+          <div className="mt-2 flex justify-between">
+            <p className="font-medium">Check-in Date</p>
+            <p className="text-sm text-gray-600">{formattedCheckinDate}</p>
+          </div>
+          <div className="mt-2 flex justify-between">
+            <p className="font-medium">Check-out Date</p>
+            <p className="text-sm text-gray-600">{formattedCheckoutDate}</p>
+          </div>
+          <div className="mt-2 flex justify-between">
+            <p className="font-medium">Duration</p>
+            <p className="text-sm text-gray-600">
+              {numberOfNights} night{numberOfNights > 1 ? "s" : ""}
+            </p>
           </div>
 
           <div className="mt-4 rounded-lg bg-gray-50 p-4">
@@ -135,14 +163,25 @@ function AddToCartConfirmationDialog({
               </div>
               <p className="font-medium">
                 Rp {selectedOption.price.toLocaleString("id-ID")}
+                <span className="text-xs font-normal text-gray-500">
+                  /night
+                </span>
               </p>
             </div>
 
             <div className="mt-2 flex justify-between text-sm">
-              <span>Quantity:</span>
-              <span>
-                {quantity} room{quantity > 1 ? "s" : ""}
-              </span>
+              <div>
+                <div>Quantity:</div>
+                <div>Duration:</div>
+              </div>
+              <div className="text-right">
+                <div>
+                  {quantity} room{quantity > 1 ? "s" : ""}
+                </div>
+                <div>
+                  {numberOfNights} night{numberOfNights > 1 ? "s" : ""}
+                </div>
+              </div>
             </div>
 
             <div className="mt-2 flex justify-between font-medium">
@@ -150,6 +189,21 @@ function AddToCartConfirmationDialog({
               <span>Rp {roomTotal.toLocaleString("id-ID")}</span>
             </div>
           </div>
+
+          {promoCode && (
+            <div className="mt-4">
+              <div className="flex justify-between">
+                <span>Promo Code:</span>
+                <span className="font-medium text-green-600">{promoCode}</span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Discount:</span>
+                <span className="font-medium text-green-600">
+                  -Rp {discount.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          )}
 
           {selectedServices.length > 0 && (
             <div className="mt-4">
@@ -168,21 +222,6 @@ function AddToCartConfirmationDialog({
                   <span>Services Total:</span>
                   <span>Rp {servicesTotal.toLocaleString("id-ID")}</span>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {promoCode && (
-            <div className="mt-4">
-              <div className="flex justify-between">
-                <span>Promo Code:</span>
-                <span className="font-medium text-green-600">{promoCode}</span>
-              </div>
-              <div className="mt-1 flex justify-between">
-                <span>Discount:</span>
-                <span className="font-medium text-green-600">
-                  -Rp {discount.toLocaleString("id-ID")}
-                </span>
               </div>
             </div>
           )}
@@ -206,7 +245,7 @@ function AddToCartConfirmationDialog({
           </Button>
           <Button
             onClick={onConfirm}
-            className="flex-1 bg-slate-800 hover:bg-slate-700"
+            className="flex-1 hover:bg-slate-700"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -243,6 +282,10 @@ export default function RoomCard({
   const [selectedPromo, setSelectedPromo] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  // Get date parameters from URL
+  const [from] = useQueryState("from", parseAsString);
+  const [to] = useQueryState("to", parseAsString);
 
   // Sample promos - in a real app, these would come from props or API
   const availablePromos: Promo[] = [
@@ -283,7 +326,20 @@ export default function RoomCard({
 
   // Calculate pricing information
   const calculatePricing = () => {
-    const roomTotal = options[selectedOption].price * roomQuantity;
+    // Parse dates
+    const checkinDate = from ? new Date(from) : new Date();
+    const checkoutDate = to
+      ? new Date(to)
+      : new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000); // Default to tomorrow
+
+    // Calculate number of nights
+    const numberOfNights = Math.ceil(
+      (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    // Calculate room total based on number of nights
+    const roomTotal =
+      options[selectedOption].price * roomQuantity * numberOfNights;
 
     const selectedServices = (additionals || []).filter(
       (service) => selectedAdditionals[service.id],
@@ -308,6 +364,7 @@ export default function RoomCard({
       servicesTotal,
       discount,
       totalPrice,
+      numberOfNights,
     };
   };
 
@@ -364,7 +421,8 @@ export default function RoomCard({
     setSelectedPromo(null);
   };
 
-  const { roomTotal, servicesTotal, discount, totalPrice } = calculatePricing();
+  const { roomTotal, servicesTotal, discount, totalPrice, numberOfNights } =
+    calculatePricing();
 
   return (
     <Card className="overflow-hidden rounded-lg bg-white shadow-sm">
@@ -444,7 +502,7 @@ export default function RoomCard({
               <Button
                 onClick={handleAddToCart}
                 disabled={isPending}
-                className="bg-slate-800 px-8 py-2 text-white hover:bg-slate-700 disabled:opacity-50"
+                className="px-8 py-2 text-white hover:bg-slate-700 disabled:opacity-50"
               >
                 {isPending ? "Adding..." : "Add to Cart"}
               </Button>
@@ -478,6 +536,7 @@ export default function RoomCard({
             roomTotal,
             servicesTotal,
             discount,
+            numberOfNights,
           }}
         />
       </div>

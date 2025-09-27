@@ -16,6 +16,7 @@ import { formatCurrency } from "@/lib/format";
 import { ChevronsLeft, ChevronsRight, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import React from "react";
 
@@ -150,8 +151,16 @@ interface HotelCardProps {
 }
 
 const HotelCard = ({ hotel }: HotelCardProps) => {
+  const searchParams = useSearchParams();
+
+  const params = new URLSearchParams(searchParams.toString());
+  params.delete("location");
+  const stringQuery = params.toString();
+
+  const href = stringQuery ? `/hotel-detail?${stringQuery}` : "/hotel-detail";
+
   return (
-    <Link href={`/hotel-detail`}>
+    <Link href={href}>
       <Card className="gap-0 overflow-hidden rounded py-0 hover:opacity-75">
         <div className="relative aspect-[2/1]">
           <Image
