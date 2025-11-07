@@ -93,6 +93,7 @@ export async function refreshAccessToken(
     }
 
     if (!response.ok || data.status !== 200 || !data.data) {
+      // redirect("/logout");
       throw new Error(data.message || "Failed to refresh access token");
     }
 

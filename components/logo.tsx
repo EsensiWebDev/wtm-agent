@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import ImageLogo from "@/public/logo.png";
 import Image from "next/image";
 
 export const Logo = ({
@@ -10,7 +11,7 @@ export const Logo = ({
 }) => {
   return (
     <Image
-      src="/logo.png"
+      src={ImageLogo}
       alt="Logo"
       width={100}
       height={100}
@@ -29,7 +30,7 @@ export const LogoIcon = ({
 }) => {
   return (
     <Image
-      src="/logo.png"
+      src={ImageLogo}
       alt="Logo"
       width={18}
       height={18}
@@ -42,7 +43,7 @@ export const LogoIcon = ({
 export const LogoStroke = ({ className }: { className?: string }) => {
   return (
     <Image
-      src="/logo.png"
+      src={ImageLogo}
       alt="Logo"
       width={71}
       height={25}

@@ -1,13 +1,14 @@
 "use client";
 
-import { loginAction } from "@/app/login/action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
+import HBLogo from "@/public/hb_logo.png";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
-import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Please enter a valid username"),
@@ -109,7 +109,7 @@ export function LoginForm({
     <div className={cn("w-full max-w-md space-y-8", className)} {...props}>
       <div className="text-center">
         <Image
-          src="/hb_logo.png"
+          src={HBLogo}
           alt="THE HOTEL BOX Logo"
           width={144}
           height={144}

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
+import HBText from "@/public/hb_text.png";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUp, Loader } from "lucide-react";
 import Image from "next/image";
@@ -150,7 +151,7 @@ export function RegisterForm({
     <div className={cn("w-full max-w-6xl space-y-8", className)} {...props}>
       <div className="text-center">
         <Image
-          src="/hb_text.png"
+          src={HBText}
           alt="THE HOTEL BOX Logo"
           width={144}
           height={144}
