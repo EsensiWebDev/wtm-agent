@@ -26,6 +26,12 @@ interface HotelResultsProps {
 }
 
 const HotelResults = ({ promise }: HotelResultsProps) => {
+  const hotelsData = React.use(promise);
+
+  const { status } = hotelsData;
+
+  if (status !== 200) return null;
+
   return (
     <section className="grid auto-rows-min grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-3 lg:grid-cols-3">
       <SearchByName />
@@ -79,15 +85,6 @@ const HotelList = ({ promise }: HotelListProps) => {
   const pageCount = pagination?.total_pages || 1;
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [search] = useQueryState("search", parseAsString);
-
-  // Filter hotels based on search term
-  const filteredHotels = React.useMemo(() => {
-    if (!search) return hotels;
-    return hotels.filter((hotel) =>
-      hotel.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [hotels, search]);
 
   const handleFirst = () => {
     if (page > 1) setPage(1);
@@ -106,10 +103,10 @@ const HotelList = ({ promise }: HotelListProps) => {
 
   return (
     <>
-      {filteredHotels.map((hotel) => (
+      {hotels.map((hotel) => (
         <HotelCard key={hotel.id} hotel={hotel} />
       ))}
-      {filteredHotels.length === 0 && (
+      {hotels.length === 0 && (
         <div className="col-span-full py-8 text-center">
           <p className="text-muted-foreground">
             No hotels found matching your search.

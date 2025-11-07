@@ -375,6 +375,10 @@ const FilterSidebar = ({
   promise: Promise<Awaited<ReturnType<typeof getHotels>>>;
 }) => {
   const hotelsData = React.use(promise);
+  const { status } = hotelsData;
+
+  if (status !== 200) return null;
+
   const {
     data: {
       filter_ratings,
