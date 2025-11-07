@@ -1,5 +1,13 @@
 "use client";
 
+import { getHotels } from "@/app/(protected)/home/fetch";
+import {
+  FilterBedTypes,
+  FilterDistricts,
+  FilterPricing,
+  FilterRatings,
+  FilterTotalRooms,
+} from "@/app/(protected)/home/types";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
@@ -11,7 +19,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardHeader } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
@@ -38,14 +46,34 @@ const DISTRICT_OPTIONS = [
   { id: "medan", name: "Medan" },
 ];
 
-function DistrictCard() {
+function DistrictCard({
+  filter_districts,
+}: {
+  filter_districts: FilterDistricts | null;
+}) {
   const [showAll, setShowAll] = useState(false);
   const [selectedDistricts, setSelectedDistricts] = useQueryState(
-    "districts",
+    "district",
     parseAsArrayOf(parseAsString)
       .withDefault([])
       .withOptions({ shallow: false }),
   );
+
+  // Handle case when filter_districts is null or empty
+  if (!filter_districts || filter_districts.length === 0) {
+    return (
+      <Card className={"gap-0 rounded p-0 pb-4"}>
+        <CardHeader className="mb-4 rounded-t bg-gray-200 px-4 pt-2">
+          <h3 className="font-medium">District / City</h3>
+        </CardHeader>
+        <div className="px-4 py-2">
+          <p className="text-sm text-gray-500">
+            District/city filter is currently unavailable
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   const handleDistrictChange = (districtId: string) => {
     const currentDistricts = selectedDistricts || [];
@@ -56,8 +84,8 @@ function DistrictCard() {
   };
 
   const displayedDistricts = showAll
-    ? DISTRICT_OPTIONS
-    : DISTRICT_OPTIONS.slice(0, 6);
+    ? filter_districts
+    : filter_districts.slice(0, 6);
 
   return (
     <Card className={"gap-0 rounded p-0 pb-4"}>
@@ -65,39 +93,41 @@ function DistrictCard() {
         <h3 className="font-medium">District / City</h3>
       </CardHeader>
       <div className="grid grid-cols-3 gap-2 px-4">
-        {displayedDistricts.map((d) => (
+        {displayedDistricts.map((district) => (
           <div
-            key={d.id}
+            key={district}
             className={cn(
-              "border-input bg-primary ring-offset-priomary hover:bg-primary/90 focus-visible:ring-ring flex items-center justify-center rounded-md border px-3 py-2 text-sm text-white transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-              selectedDistricts?.includes(d.id) && "bg-primary text-white",
+              "border-input ring-offset-priomary hover:bg-primary/90 focus-visible:ring-ring flex items-center justify-center rounded-md border px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+              selectedDistricts?.includes(district)
+                ? "bg-primary text-white hover:text-white"
+                : "bg-white text-gray-800 hover:bg-gray-200",
             )}
           >
             <Checkbox
-              id={d.id}
-              checked={selectedDistricts?.includes(d.id)}
-              onCheckedChange={() => handleDistrictChange(d.id)}
+              id={district}
+              checked={selectedDistricts?.includes(district)}
+              onCheckedChange={() => handleDistrictChange(district)}
               className="sr-only"
             />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <label
-                    htmlFor={d.id}
+                    htmlFor={district}
                     className="max-w-full cursor-pointer truncate text-center text-xs"
                   >
-                    {d.name}
+                    {district}
                   </label>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{d.name}</p>
+                  <p>{district}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
         ))}
       </div>
-      {DISTRICT_OPTIONS.length > 6 && (
+      {filter_districts.length > 6 && (
         <Button
           variant="ghost"
           className="mt-2 w-full"
@@ -118,11 +148,13 @@ function DistrictCard() {
   );
 }
 
-function PriceRangeCard() {
-  const [{ minPrice, maxPrice }, setPrices] = useQueryStates({
-    minPrice: parseAsInteger.withDefault(0).withOptions({ shallow: false }),
-    maxPrice: parseAsInteger
-      .withDefault(5_000_000)
+function PriceRangeCard({ filter_pricing }: { filter_pricing: FilterPricing }) {
+  const [{ range_price_min, range_price_max }, setPrices] = useQueryStates({
+    range_price_min: parseAsInteger
+      .withDefault(filter_pricing.min_price)
+      .withOptions({ shallow: false }),
+    range_price_max: parseAsInteger
+      .withDefault(filter_pricing.max_price)
       .withOptions({ shallow: false }),
   });
 
@@ -133,30 +165,34 @@ function PriceRangeCard() {
       </CardHeader>
       <div className="px-4">
         <Slider
-          defaultValue={[minPrice, maxPrice]}
-          max={15000000}
+          defaultValue={[range_price_min, range_price_max]}
           min={0}
-          step={100000}
+          max={10_000_000}
+          step={50_000}
           className={"py-2"}
           onValueChange={async (e) => {
             await setPrices({
-              minPrice: e[0],
-              maxPrice: e[1],
+              range_price_min: e[0],
+              range_price_max: e[1],
             });
           }}
         />
         <div className="mt-2 flex items-center justify-between text-sm">
-          <span>{formatCurrency(minPrice, "IDR")}</span>
-          <span>{formatCurrency(maxPrice, "IDR")}</span>
+          <span>{formatCurrency(range_price_min, "IDR")}</span>
+          <span>{formatCurrency(range_price_max, "IDR")}</span>
         </div>
       </div>
     </Card>
   );
 }
 
-function StarRatingCard() {
+function StarRatingCard({
+  filter_ratings,
+}: {
+  filter_ratings: FilterRatings[];
+}) {
   const [star, setStar] = useQueryState(
-    "star",
+    "rating",
     parseAsArrayOf(parseAsString)
       .withDefault([])
       .withOptions({ shallow: false }),
@@ -168,25 +204,28 @@ function StarRatingCard() {
         <h3 className="font-medium">Hotel Classification</h3>
       </CardHeader>
       <div className="space-y-2 px-4">
-        {Array.from({ length: 5 }, (_, i) => {
-          const starValue = (i + 1).toString();
-          return (
-            <label key={starValue} className="flex items-center gap-2">
-              <Checkbox
-                checked={star.includes(starValue)}
-                onCheckedChange={(checked: CheckedState) => {
-                  return checked
-                    ? setStar([...star, starValue])
-                    : setStar(star.filter((value) => value !== starValue));
-                }}
-              />
-              <span>
-                {"★".repeat(Number(starValue))} {starValue} -Star (
-                {123 - Number(starValue)})
-              </span>
-            </label>
-          );
-        })}
+        {filter_ratings.map((rating) => (
+          <label key={rating.rating} className="flex items-center gap-2">
+            <Checkbox
+              checked={star.includes(rating.rating.toString())}
+              onCheckedChange={(checked: CheckedState) => {
+                return checked
+                  ? setStar([...star, rating.rating.toString()])
+                  : setStar(
+                      star.filter(
+                        (value) => value !== rating.rating.toString(),
+                      ),
+                    );
+              }}
+            />
+            <span>
+              <span className="text-yellow-500">
+                {"★".repeat(rating.rating)}
+              </span>{" "}
+              {rating.rating}-Star ({rating.count})
+            </span>
+          </label>
+        ))}
       </div>
     </Card>
   );
@@ -211,32 +250,56 @@ const BEDTYPES = [
   },
 ];
 
-export function BedTypeCard() {
+export function BedTypeCard({
+  filter_bed_types,
+}: {
+  filter_bed_types: FilterBedTypes[] | null;
+}) {
   const [bedType, setBedType] = useQueryState(
-    "bedType",
+    "bed_type_id",
     parseAsArrayOf(parseAsString)
       .withDefault([])
       .withOptions({ shallow: false }),
   );
 
+  // Handle case when filter_bed_types is null
+  if (!filter_bed_types) {
+    return (
+      <Card className="gap-0 rounded p-0 pb-4">
+        <CardHeader className="mb-4 rounded-t bg-gray-200 px-4 pt-2">
+          <h3 className="font-medium">Bed Type</h3>
+        </CardHeader>
+        <div className="px-4 py-2">
+          <p className="text-sm text-gray-500">
+            Bed type filter is currently unavailable
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="gap-0 rounded p-0 pb-4">
       <CardHeader className="mb-4 rounded-t bg-gray-200 px-4 pt-2">
-        <h3 className="font-medium">Hotel Classification</h3>
+        <h3 className="font-medium">Bed Type</h3>
       </CardHeader>
       <div className="space-y-2 px-4">
-        {BEDTYPES.map((type) => (
-          <label className="flex items-center gap-2" key={type.id}>
+        {filter_bed_types.map((type) => (
+          <label className="flex items-center gap-2" key={type.bed_type_id}>
             <Checkbox
-              id={type.id}
-              checked={bedType.includes(type.id)}
+              id={String(type.bed_type_id)}
+              checked={bedType.includes(String(type.bed_type_id))}
               onCheckedChange={(checked) => {
                 return checked
-                  ? setBedType([...bedType, type.id])
-                  : setBedType(bedType.filter((value) => value !== type.id));
+                  ? setBedType([...bedType, String(type.bed_type_id)])
+                  : setBedType(
+                      bedType.filter(
+                        (value) => value !== String(type.bed_type_id),
+                      ),
+                    );
               }}
             />
-            <span>{type.label}</span>
+            <span className="capitalize">{type.bed_type}</span>
           </label>
         ))}
       </div>
@@ -244,13 +307,33 @@ export function BedTypeCard() {
   );
 }
 
-function BedroomTypeCard() {
+function BedroomTypeCard({
+  filter_total_rooms,
+}: {
+  filter_total_rooms: FilterTotalRooms[] | null;
+}) {
   const [bedRoomType, setBedRoomType] = useQueryState(
-    "bedRoomType",
+    "total_rooms",
     parseAsArrayOf(parseAsString)
       .withDefault([])
       .withOptions({ shallow: false }),
   );
+
+  // Handle case when filter_total_rooms is null
+  if (!filter_total_rooms) {
+    return (
+      <Card className={"gap-0 rounded p-0 pb-4"}>
+        <CardHeader className="mb-4 rounded-t bg-gray-200 px-4 pt-2">
+          <h3 className="font-medium">Bedroom Type</h3>
+        </CardHeader>
+        <div className="px-4 py-2">
+          <p className="text-sm text-gray-500">
+            Bedroom type filter is currently unavailable
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className={"gap-0 rounded p-0 pb-4"}>
@@ -258,37 +341,57 @@ function BedroomTypeCard() {
         <h3 className="font-medium">Bedroom Type</h3>
       </CardHeader>
       <div className="space-y-2 px-4">
-        {Array.from({ length: 3 }, (_, i) => {
-          const bedValue = (i + 1).toString();
-          return (
-            <label key={bedValue} className="flex items-center gap-2">
-              <Checkbox
-                checked={bedRoomType.includes(bedValue)}
-                onCheckedChange={(checked: CheckedState) => {
-                  return checked
-                    ? setBedRoomType([...bedRoomType, bedValue])
-                    : setBedRoomType(
-                        bedRoomType.filter((value) => value !== bedValue),
-                      );
-                }}
-              />
-              <span>{bedValue} Bedroom</span>
-            </label>
-          );
-        })}
+        {filter_total_rooms.map((type) => (
+          <label className="flex items-center gap-2" key={type.total_bed_rooms}>
+            <Checkbox
+              id={String(type.total_bed_rooms)}
+              checked={bedRoomType.includes(String(type.total_bed_rooms))}
+              onCheckedChange={(checked) => {
+                return checked
+                  ? setBedRoomType([
+                      ...bedRoomType,
+                      String(type.total_bed_rooms),
+                    ])
+                  : setBedRoomType(
+                      bedRoomType.filter(
+                        (value) => value !== String(type.total_bed_rooms),
+                      ),
+                    );
+              }}
+            />
+            <span>
+              {type.total_bed_rooms} Bedroom ({type.count})
+            </span>
+          </label>
+        ))}
       </div>
     </Card>
   );
 }
 
-const FilterSidebar = () => {
+const FilterSidebar = ({
+  promise,
+}: {
+  promise: Promise<Awaited<ReturnType<typeof getHotels>>>;
+}) => {
+  const hotelsData = React.use(promise);
+  const {
+    data: {
+      filter_ratings,
+      filter_bed_types,
+      filter_total_rooms,
+      filter_districts,
+      filter_pricing,
+    },
+  } = hotelsData;
+
   return (
     <aside className="space-y-6 md:space-y-6">
-      <DistrictCard />
-      <PriceRangeCard />
-      <StarRatingCard />
-      <BedTypeCard />
-      <BedroomTypeCard />
+      <DistrictCard filter_districts={filter_districts} />
+      <PriceRangeCard filter_pricing={filter_pricing} />
+      <StarRatingCard filter_ratings={filter_ratings} />
+      <BedTypeCard filter_bed_types={filter_bed_types} />
+      <BedroomTypeCard filter_total_rooms={filter_total_rooms} />
     </aside>
   );
 };

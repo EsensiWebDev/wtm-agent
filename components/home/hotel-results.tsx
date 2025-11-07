@@ -18,7 +18,7 @@ import { ChevronsLeft, ChevronsRight, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { parseAsInteger, useQueryState } from "nuqs";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import React from "react";
 
 interface HotelResultsProps {
@@ -37,17 +37,33 @@ const HotelResults = ({ promise }: HotelResultsProps) => {
 };
 
 const SearchByName = () => {
+  const [search, setSearch] = useQueryState("search", parseAsString);
+  const [searchInput, setSearchInput] = React.useState(search ?? "");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearch(searchInput || null);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+
   return (
     <div className="col-span-1 flex gap-2 sm:col-span-2 lg:col-span-3">
-      <Input
-        className="rounded bg-white"
-        placeholder={"Search Hotel Name Here..."}
-        role="search"
-      />
-      <Button className="rounded">
-        <Search className="h-4 w-4" />
-        <div className="hidden sm:inline">Search</div>
-      </Button>
+      <form onSubmit={handleSubmit} className="flex flex-1 gap-2">
+        <Input
+          className="rounded bg-white"
+          placeholder={"Search Hotel Name Here..."}
+          role="search"
+          value={searchInput}
+          onChange={handleInputChange}
+        />
+        <Button className="rounded" type="submit">
+          <Search className="h-4 w-4" />
+          <div className="hidden sm:inline">Search</div>
+        </Button>
+      </form>
     </div>
   );
 };
@@ -63,6 +79,15 @@ const HotelList = ({ promise }: HotelListProps) => {
   const pageCount = pagination?.total_pages || 1;
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [search] = useQueryState("search", parseAsString);
+
+  // Filter hotels based on search term
+  const filteredHotels = React.useMemo(() => {
+    if (!search) return hotels;
+    return hotels.filter((hotel) =>
+      hotel.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [hotels, search]);
 
   const handleFirst = () => {
     if (page > 1) setPage(1);
@@ -81,9 +106,16 @@ const HotelList = ({ promise }: HotelListProps) => {
 
   return (
     <>
-      {hotels.map((hotel) => (
+      {filteredHotels.map((hotel) => (
         <HotelCard key={hotel.id} hotel={hotel} />
       ))}
+      {filteredHotels.length === 0 && (
+        <div className="col-span-full py-8 text-center">
+          <p className="text-muted-foreground">
+            No hotels found matching your search.
+          </p>
+        </div>
+      )}
       <div className="col-span-full">
         <Pagination>
           <PaginationContent>

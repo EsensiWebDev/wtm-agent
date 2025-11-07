@@ -26,7 +26,7 @@ const HomePage = async (props: HomePageProps) => {
         <div className="py-4">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <React.Suspense fallback="Loading...">
-              <FilterSidebar />
+              <FilterSidebar promise={hotelsPromise} />
             </React.Suspense>
 
             <React.Suspense fallback="Loading...">

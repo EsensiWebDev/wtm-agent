@@ -1,22 +1,22 @@
 import { SearchParams } from "@/types";
 
-interface FilterBedTypes {
+export interface FilterBedTypes {
   bed_type: string;
   bed_type_id: number;
   count: number;
 }
 
-type FilterDistricts = string[];
+export type FilterDistricts = string[];
 
-interface FilterPricing {
+export interface FilterPricing {
   max_price: number;
   min_price: number;
 }
-interface FilterRatings {
+export interface FilterRatings {
   rating: number;
   count: number;
 }
-interface FilterTotalRooms {
+export interface FilterTotalRooms {
   count: number;
   total_bed_rooms: number;
 }
@@ -33,7 +33,7 @@ export interface Hotel {
 export interface HotelListData {
   filter_bed_types: FilterBedTypes[];
   filter_districts: FilterDistricts;
-  filter_pricing: FilterPricing[];
+  filter_pricing: FilterPricing;
   filter_ratings: FilterRatings[];
   filter_total_rooms: FilterTotalRooms[];
   hotels: Hotel[];
