@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { getIcon } from "@/lib/utils";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface RoomDetailsDialogProps {
   open: boolean;
@@ -29,22 +29,15 @@ interface RoomDetailsDialogProps {
   }[];
 }
 
-// Custom image component with fallback
-function ImageWithFallback({
-  src,
-  alt,
-  className,
-  fill,
-  sizes,
-}: {
+// Simplified image component with fallback
+const ImageWithFallback: React.FC<{
   src: string;
   alt: string;
   className?: string;
   fill?: boolean;
   sizes?: string;
-}) {
-  const [error, setError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+}> = ({ src, alt, className, fill, sizes }) => {
+  const [hasError, setHasError] = useState(false);
 
   // Handle cases where src is empty or undefined
   if (!src) {
@@ -60,7 +53,7 @@ function ImageWithFallback({
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <div
         className={`${className} flex items-center justify-center bg-gray-100`}
@@ -80,12 +73,10 @@ function ImageWithFallback({
       className={className}
       fill={fill}
       sizes={sizes}
-      onError={() => setError(true)}
-      onLoad={() => setIsLoading(false)}
-      style={{ display: isLoading ? "none" : "block" }}
+      onError={() => setHasError(true)}
     />
   );
-}
+};
 
 const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
   open,
@@ -93,31 +84,47 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
   room,
   features,
 }) => {
-  const [mainApi, setMainApi] = useState<CarouselApi>();
+  const [mainApi, setMainApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(1);
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState(0);
+
+  const handleSelect = useCallback(() => {
+    if (!mainApi) return;
+    setCurrent(mainApi.selectedScrollSnap() + 1);
+  }, [mainApi]);
+
+  const updateCarouselState = useCallback(() => {
+    if (!mainApi) return;
+    setCount(mainApi.scrollSnapList().length);
+    setCurrent(mainApi.selectedScrollSnap() + 1);
+  }, [mainApi]);
 
   useEffect(() => {
     if (!mainApi) return;
 
-    setCount(mainApi.scrollSnapList().length);
-    setCurrent(mainApi.selectedScrollSnap() + 1);
+    updateCarouselState();
+    mainApi.on("select", handleSelect);
 
-    mainApi.on("select", () => {
-      setCurrent(mainApi.selectedScrollSnap() + 1);
-    });
-  }, [mainApi]);
+    return () => {
+      mainApi.off("select", handleSelect);
+    };
+  }, [mainApi, handleSelect, updateCarouselState]);
 
-  // Reset state when dialog opens
+  // Reset carousel state when dialog opens
   useEffect(() => {
-    if (open) {
-      setCurrent(1);
+    if (open && mainApi) {
+      // Delay to ensure carousel is properly initialized
+      const timer = setTimeout(() => {
+        updateCarouselState();
+        setCurrent(1);
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [open, mainApi, updateCarouselState]);
 
   if (!room) return null;
 
-  // Check if room has photos
   const hasPhotos = room.photos && room.photos.length > 0;
 
   return (
@@ -136,7 +143,7 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
               {hasPhotos ? (
                 <Carousel setApi={setMainApi} className="w-full">
                   <CarouselContent>
-                    {room.photos?.map((photo, index) => (
+                    {room.photos.map((photo, index) => (
                       <CarouselItem key={index}>
                         <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                           <ImageWithFallback
@@ -150,7 +157,7 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  {room.photos?.length > 1 && (
+                  {room.photos.length > 1 && (
                     <>
                       <CarouselPrevious className="left-2 h-8 w-8 bg-white/90 shadow-md hover:bg-white" />
                       <CarouselNext className="right-2 h-8 w-8 bg-white/90 shadow-md hover:bg-white" />
@@ -158,7 +165,6 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
                   )}
                 </Carousel>
               ) : (
-                // Fallback when no photos are available
                 <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                   <div className="text-center">
                     <div className="mx-auto h-12 w-12 text-gray-400" />
@@ -169,8 +175,7 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
                 </div>
               )}
 
-              {/* Image counter - only show if there are photos */}
-              {hasPhotos && (
+              {hasPhotos && count > 1 && (
                 <div className="absolute right-2 bottom-2 rounded bg-black/50 px-2 py-1 text-sm text-white">
                   {current} / {count}
                 </div>
@@ -195,24 +200,9 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
             <div>
               <h3 className="mb-4 text-lg font-semibold">About This Room</h3>
               <div className="space-y-3">
-                {/* {roomDetails.aboutRoom.map((detail, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gray-400" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      {detail.includes(" - ") ? (
-                        <>
-                          <span className="font-medium">
-                            {detail.split(" - ")[0]}
-                          </span>
-                          {" - "}
-                          {detail.split(" - ").slice(1).join(" - ")}
-                        </>
-                      ) : (
-                        detail
-                      )}
-                    </span>
-                  </div>
-                ))} */}
+                <p className="text-sm leading-relaxed text-gray-700">
+                  {room.description}
+                </p>
               </div>
             </div>
           </div>
