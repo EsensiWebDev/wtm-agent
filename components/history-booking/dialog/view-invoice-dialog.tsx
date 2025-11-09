@@ -49,12 +49,7 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
 
   // Helper function to get consistent invoice count
   const getInvoiceCount = useCallback((booking: HistoryBooking): number => {
-    // Generate invoice count based on booking ID to ensure consistency
-    const hash = booking.bookingId.split("").reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    return Math.abs(hash % 3) + 1; // 1-3 invoices
+    return 1;
   }, []);
 
   // Generate multiple invoice data when booking changes

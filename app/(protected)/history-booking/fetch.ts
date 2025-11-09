@@ -17,7 +17,7 @@ export const getData = async ({
       {
         booking_code: "BK-251108-y4m4",
         booking_id: 1,
-        booking_status: "2 of 2 approved",
+        booking_status: "1 of 1 approved",
         detail: [
           {
             additional: ["string", "string2"],

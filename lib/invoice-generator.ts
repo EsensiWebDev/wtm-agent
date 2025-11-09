@@ -86,8 +86,8 @@ export class InvoiceGenerator {
 
     return {
       // Basic booking information
-      bookingId: booking.bookingId,
-      guestName: booking.guestName,
+      bookingId: booking.booking_id.toString(),
+      guestName: booking.guest_name.join(", "),
       bookingDate: this.generateBookingDate(),
       checkInDate,
       checkOutDate,
@@ -111,14 +111,18 @@ export class InvoiceGenerator {
       discountRate,
 
       // Status information
-      bookingStatus: booking.bookingStatus,
-      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.booking_status as
+        | "approved"
+        | "waiting"
+        | "rejected",
+      paymentStatus: booking.payment_status as "paid" | "unpaid",
 
       // Invoice metadata
       invoiceNumber: this.generateInvoiceNumber(),
       invoiceDate: new Date().toISOString(),
       dueDate: this.generateDueDate(),
-      notes: booking.notes || this.generateNotes(),
+      notes: "",
+      // notes: booking.notes || this.generateNotes(),
 
       // Additional hotel details
       hotelRating: this.generateHotelRating(),
@@ -128,7 +132,7 @@ export class InvoiceGenerator {
 
       // Company and customer information
       company: this.COMPANY_INFO,
-      customer: this.generateCustomerInfo(booking.guestName),
+      customer: this.generateCustomerInfo(booking.guest_name.join(", ")),
       lineItems: this.generateLineItems(
         roomType,
         numberOfNights,
@@ -139,7 +143,9 @@ export class InvoiceGenerator {
       // Payment information
       paymentMethod: this.generatePaymentMethod(),
       paymentDueDate:
-        booking.paymentStatus === "unpaid" ? this.generateDueDate() : undefined,
+        booking.payment_status === "unpaid"
+          ? this.generateDueDate()
+          : undefined,
       termsAndConditions: this.generateTermsAndConditions(),
     };
   }

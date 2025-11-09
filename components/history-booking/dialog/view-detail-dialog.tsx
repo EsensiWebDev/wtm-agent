@@ -32,22 +32,11 @@ import {
   IconReceipt,
 } from "@tabler/icons-react";
 import { Ellipsis } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import ViewInvoiceDialog from "./view-invoice-dialog";
 import ViewReceiptDialog from "./view-receipt-dialog";
-import Link from "next/link";
-
-// Helper function to get invoice count for a booking
-function getInvoiceCount(booking: HistoryBooking): number {
-  // Generate invoice count based on booking ID to ensure consistency
-  // This matches the logic in the invoice dialog
-  const hash = booking.bookingId.split("").reduce((a, b) => {
-    a = (a << 5) - a + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  return Math.abs(hash % 3) + 1; // 1-3 invoices
-}
 
 interface ViewDetailDialogProps {
   open: boolean;
@@ -82,7 +71,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
 
     setIsLoading(true);
     try {
-      const result = await cancelBookingAction(booking.bookingId);
+      const result = await cancelBookingAction(String(booking.booking_id));
 
       if (result.success) {
         toast.success(result.message);
@@ -101,33 +90,8 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
   const handleCancelDialogClose = () => {
     setConfirmDialogOpen(false);
   };
-  // Extended booking data for display (in real implementation, this would come from API)
-  const getExtendedBookingData = (booking: HistoryBooking) => {
-    return [
-      {
-        guestName: booking.guestName,
-        picAgent: "Hecky",
-        hotelName: "Ibis Hotel & Convention",
-        hotelAdditional: "No Additional",
-        subBookingId: "01292929",
-        bookingStatus: booking.bookingStatus,
-        paymentStatus: booking.paymentStatus,
-        cancellationPeriod: "until 15 Feb 2025",
-      },
-      {
-        guestName: "Eugenia Caroline",
-        picAgent: "Hecky",
-        hotelName: "Atria Hotel Bali",
-        hotelAdditional: "+Ipax Breakfast",
-        subBookingId: "01292929",
-        bookingStatus: booking.bookingStatus,
-        paymentStatus: booking.paymentStatus,
-        cancellationPeriod: "until 15 Feb 2025",
-      },
-    ];
-  };
 
-  const bookingDetails = booking ? getExtendedBookingData(booking) : [];
+  const bookingDetails = booking?.detail || [];
 
   const getStatusBadge = (status: string, type: "booking" | "payment") => {
     if (type === "booking") {
@@ -169,7 +133,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[95vw] overflow-hidden bg-white px-8 sm:max-w-[1060px]">
+      <DialogContent className="max-h-[90vh] w-[80vw] overflow-hidden bg-white px-8 sm:max-w-[80vw]">
         <DialogHeader>
           <DialogTitle>Booking Details</DialogTitle>
         </DialogHeader>
@@ -180,14 +144,14 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
               <Table className="min-w-full table-fixed">
                 <TableHeader>
                   <TableRow className="!bg-white">
-                    <TableHead className="w-[120px]">Guest Name</TableHead>
-                    <TableHead className="w-[100px]">PIC Agent</TableHead>
-                    <TableHead className="w-[200px]">Hotel Name</TableHead>
-                    <TableHead className="w-[120px]">Sub-booking ID</TableHead>
+                    <TableHead>Guest Name</TableHead>
+                    <TableHead>PIC Agent</TableHead>
+                    <TableHead>Hotel Name</TableHead>
+                    <TableHead className="w-[200px]">Sub-booking ID</TableHead>
                     <TableHead className="w-[120px]">Booking Status</TableHead>
                     <TableHead className="w-[120px]">Payment Status</TableHead>
                     <TableHead className="w-[150px]"></TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -196,26 +160,28 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                       key={index}
                       className="[&:nth-child(odd)]:bg-white"
                     >
-                      <TableCell className="font-medium">
-                        <div>
-                          <div>{detail.guestName}</div>
-                        </div>
+                      <TableCell className="font-medium capitalize">
+                        {detail.guest_name}
                       </TableCell>
-                      <TableCell>{detail.picAgent}</TableCell>
+                      <TableCell className="capitalize">
+                        {detail.agent_name}
+                      </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{detail.hotelName}</div>
-                          <div className="text-muted-foreground text-sm">
-                            {detail.hotelAdditional}
+                          <div className="font-medium capitalize">
+                            {detail.hotel_name}
+                          </div>
+                          <div className="text-muted-foreground text-sm capitalize">
+                            {detail.additional.join(", ")}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{detail.subBookingId}</TableCell>
-                      <TableCell>
-                        {getStatusBadge(detail.bookingStatus, "booking")}
+                      <TableCell>{detail.sub_booking_id}</TableCell>
+                      <TableCell className="capitalize">
+                        {getStatusBadge(detail.booking_status, "booking")}
                       </TableCell>
-                      <TableCell>
-                        {getStatusBadge(detail.paymentStatus, "payment")}
+                      <TableCell className="capitalize">
+                        {getStatusBadge(detail.payment_status, "payment")}
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
@@ -223,7 +189,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                             Cancellation Period
                           </div>
                           <div className="text-right text-red-600">
-                            {detail.cancellationPeriod}
+                            {detail.cancellation_date}
                           </div>
                         </div>
                       </TableCell>
@@ -245,7 +211,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                               <IconFileDescription className="mr-2 h-4 w-4" />
                               View Invoice
                               {(() => {
-                                const invoiceCount = getInvoiceCount(booking);
+                                const invoiceCount = 1;
                                 return invoiceCount > 1 ? (
                                   <Badge
                                     variant="secondary"
@@ -256,7 +222,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                                 ) : null;
                               })()}
                             </DropdownMenuItem>
-                            {detail.paymentStatus === "paid" ? (
+                            {detail.payment_status === "paid" ? (
                               <DropdownMenuItem
                                 onSelect={() => handleViewReceipt(booking)}
                               >
@@ -288,7 +254,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
               </Table>
               <div className="flex justify-center gap-2 py-2">
                 <Button asChild>
-                  <Link href={`/contact-us?bookingId=${booking?.bookingId}`}>
+                  <Link href={`/contact-us?bookingId=${booking?.booking_id}`}>
                     Inquire This Booking
                   </Link>
                 </Button>
@@ -332,7 +298,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
         onConfirm={handleCancelConfirm}
         onCancel={handleCancelDialogClose}
         isLoading={isLoading}
-        title={`Are you sure you want to cancel booking ${booking?.bookingId}?`}
+        title={`Are you sure you want to cancel booking ${booking?.booking_id}?`}
         description={`This action cannot be undone and the booking will be permanently cancelled.`}
       />
     </Dialog>
