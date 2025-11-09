@@ -1,0 +1,134 @@
+"use client";
+
+import { fetchNotifications } from "@/server/header";
+import { useQuery } from "@tanstack/react-query";
+import { Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+
+interface NotificationButtonProps {
+  isAuthenticated: boolean;
+}
+
+export function NotificationButton({
+  isAuthenticated,
+}: NotificationButtonProps) {
+  const router = useRouter();
+
+  const {
+    data: notificationData,
+    isLoading: isLoadingNotification,
+    isError: isErrorNotification,
+  } = useQuery({
+    queryKey: ["notification"],
+    queryFn: fetchNotifications,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
+    enabled: isAuthenticated,
+  });
+
+  // Calculate unread count from fetched notification data
+  const unreadCount =
+    notificationData?.data.filter((n) => !n.is_read).length || 0;
+
+  const handleNotificationClick = (redirectUrl: string) => {
+    // Navigate to the redirect URL from the notification
+    router.push(redirectUrl);
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative size-10"
+          disabled={isLoadingNotification}
+        >
+          {isLoadingNotification ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : (
+            <Bell className="size-5" />
+          )}
+          {unreadCount > 0 &&
+            !isLoadingNotification &&
+            !isErrorNotification && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs font-medium"
+              >
+                {unreadCount}
+              </Badge>
+            )}
+          {isErrorNotification && !isLoadingNotification && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs font-medium"
+            >
+              !
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="start">
+        <div className="border-b p-4">
+          <h3 className="text-lg font-semibold text-gray-900">Notification</h3>
+        </div>
+        <div className="max-h-96 overflow-y-auto">
+          {isLoadingNotification ? (
+            <div className="p-4 text-center">
+              <p>Loading notifications...</p>
+            </div>
+          ) : isErrorNotification ? (
+            <div className="p-4 text-center">
+              <p className="text-destructive">Error loading notifications</p>
+            </div>
+          ) : notificationData?.data.length === 0 ? (
+            <div className="p-4 text-center">
+              <p>No notifications</p>
+            </div>
+          ) : (
+            notificationData?.data.map((notification) => (
+              <div
+                key={notification.id}
+                className="flex cursor-pointer items-start gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-gray-50"
+                onClick={() =>
+                  handleNotificationClick(notification.redirect_url)
+                }
+              >
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-500">
+                  <Bell className="h-4 w-4 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between">
+                    <h4 className="text-sm font-semibold text-gray-900 capitalize">
+                      {notification.title}
+                    </h4>
+                    {!notification.is_read && (
+                      <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {notification.message}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        {unreadCount > 0 && !isLoadingNotification && !isErrorNotification && (
+          <div className="border-t p-4">
+            <Button
+              className="w-full bg-gray-800 text-white hover:bg-gray-700"
+              disabled
+            >
+              Mark All As Read
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
