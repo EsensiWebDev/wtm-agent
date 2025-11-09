@@ -25,7 +25,7 @@ type CertificateUploaderProps = {
 };
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png";
+const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp";
 
 export const CertificateUploader: React.FC<CertificateUploaderProps> = ({
   certificateUrl,
@@ -79,7 +79,11 @@ export const CertificateUploader: React.FC<CertificateUploaderProps> = ({
     const fileType = "." + file.name.split(".").pop()?.toLowerCase();
     const isFileTypeValid = acceptedTypes.some((type) => type === fileType);
 
-    if (!isFileTypeValid || !file.type.startsWith("image/")) {
+    // Also check MIME type for better validation
+    const validMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    const isMimeTypeValid = validMimeTypes.includes(file.type);
+
+    if (!isFileTypeValid || !isMimeTypeValid) {
       toast.error(
         `Please select a valid image file. Accepted formats: ${ACCEPTED_FILE_TYPES}`,
       );
@@ -180,7 +184,7 @@ export const CertificateUploader: React.FC<CertificateUploaderProps> = ({
         <DialogHeader>
           <DialogTitle>Upload Certificate</DialogTitle>
           <DialogDescription>
-            Choose a JPG or PNG image file that is no larger than 2MB.
+            Choose a JPG, PNG, or WebP image file that is no larger than 2MB.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
@@ -229,7 +233,7 @@ export const CertificateUploader: React.FC<CertificateUploaderProps> = ({
               onChange={handleFileChange}
             />
             <p className="text-muted-foreground text-xs">
-              Maximum size 2MB. Accepted formats: JPG, PNG.
+              Maximum size 2MB. Accepted formats: JPG, PNG, WebP.
             </p>
           </div>
         </div>
