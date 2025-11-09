@@ -8,13 +8,9 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
-interface NotificationButtonProps {
-  isAuthenticated: boolean;
-}
+interface NotificationButtonProps {}
 
-export function NotificationButton({
-  isAuthenticated,
-}: NotificationButtonProps) {
+export function NotificationButton({}: NotificationButtonProps) {
   const router = useRouter();
 
   const {
@@ -26,7 +22,6 @@ export function NotificationButton({
     queryFn: fetchNotifications,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
-    enabled: isAuthenticated,
   });
 
   // Calculate unread count from fetched notification data

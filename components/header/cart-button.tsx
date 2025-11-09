@@ -13,11 +13,9 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 
-interface CartButtonProps {
-  isAuthenticated: boolean;
-}
+interface CartButtonProps {}
 
-export function CartButton({ isAuthenticated }: CartButtonProps) {
+export function CartButton({}: CartButtonProps) {
   const {
     data: cartData,
     isLoading: isLoadingCart,
@@ -27,7 +25,6 @@ export function CartButton({ isAuthenticated }: CartButtonProps) {
     queryFn: fetchCart,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
-    enabled: isAuthenticated,
   });
 
   const cartItemCount = cartData?.data.detail.length || 0;

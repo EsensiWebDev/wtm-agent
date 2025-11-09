@@ -81,8 +81,8 @@ export const Header = () => {
               <div className="flex items-center gap-3">
                 {isAuthenticated ? (
                   <>
-                    <CartButton isAuthenticated={isAuthenticated} />
-                    <NotificationButton isAuthenticated={isAuthenticated} />
+                    <CartButton />
+                    <NotificationButton />
                   </>
                 ) : (
                   <></>
