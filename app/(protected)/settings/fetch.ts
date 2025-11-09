@@ -1,3 +1,5 @@
+"use server";
+
 import { apiCall } from "@/lib/api";
 import { ApiResponse } from "@/types";
 import { AccountProfile } from "./types";

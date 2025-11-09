@@ -1,4 +1,4 @@
-import type { DefaultSession } from "next-auth";
+import "next-auth";
 
 declare module "next-auth" {
   interface User extends DefaultSession["user"] {
@@ -8,8 +8,7 @@ declare module "next-auth" {
     role: string;
     permissions: unknown;
     photo_url: string | null;
-    first_name: string | null;
-    last_name: string | null;
+    full_name: string | null;
     accessToken: string;
     refreshToken: string;
     accessTokenExpires: number | null;

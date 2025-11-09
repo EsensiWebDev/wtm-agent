@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchAccountProfile } from "@/app/(protected)/settings/fetch";
+import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,6 +38,7 @@ export const Header = () => {
   const [menuState, setMenuState] = React.useState(false);
 
   const { data: session, status } = useSession();
+
   const isLoading = status === "loading";
   const isAuthenticated = !!session?.user;
 
@@ -47,6 +50,17 @@ export const Header = () => {
   const filteredMenuItems = menuItems.filter(
     (item) => item.isPublic || isAuthenticated,
   );
+
+  const {
+    data: dataProfile,
+    isLoading: isLoadingProfile,
+    isError: isErrorProfile,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchAccountProfile,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
+  });
 
   return (
     <header>
@@ -89,17 +103,14 @@ export const Header = () => {
                 )}
 
                 {/* Conditionally render sign-in button or user menu */}
-                {isLoading ? (
+                {isLoading || isLoadingProfile ? (
                   <div className="h-10 w-10 animate-pulse rounded-full bg-gray-300" />
                 ) : session?.user ? (
                   <NavUser
                     user={{
-                      name:
-                        `${session.user.first_name || ""} ${session.user.last_name || ""}`.trim() ||
-                        session.user.username ||
-                        "User",
-                      email: session.user.email || "",
-                      avatar: session.user.photo_url || "/avatars/shadcn.jpg",
+                      name: dataProfile?.data.full_name || "User",
+                      email: dataProfile?.data.email || "",
+                      avatar: dataProfile?.data.photo_profile || "",
                     }}
                   />
                 ) : (

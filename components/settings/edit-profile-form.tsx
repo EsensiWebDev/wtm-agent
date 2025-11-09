@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -40,6 +41,7 @@ interface EditProfileFormProps {
 }
 
 const EditProfileForm = ({ defaultValues }: EditProfileFormProps) => {
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ProfileSchema>({
@@ -58,6 +60,9 @@ const EditProfileForm = ({ defaultValues }: EditProfileFormProps) => {
     toast.promise(updateAccountProfile(values), {
       loading: "Saving profile changes...",
       success: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: ["profile"],
+        });
         setIsLoading(false);
         return data.message || "Profile updated successfully";
       },
@@ -95,6 +100,7 @@ const EditProfileForm = ({ defaultValues }: EditProfileFormProps) => {
             <FormField
               control={form.control}
               name="agent_company"
+              disabled
               render={({ field }) => (
                 <FormItem className="col-span-2">
                   <FormLabel className="text-sm font-medium">
@@ -102,6 +108,8 @@ const EditProfileForm = ({ defaultValues }: EditProfileFormProps) => {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      disabled
+                      readOnly
                       placeholder="Enter agent company"
                       className="bg-gray-200"
                       {...field}

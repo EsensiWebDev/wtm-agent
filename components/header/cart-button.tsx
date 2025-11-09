@@ -27,7 +27,7 @@ export function CartButton({}: CartButtonProps) {
     retry: 2,
   });
 
-  const cartItemCount = cartData?.data.detail.length || 0;
+  const cartItemCount = cartData?.data?.detail?.length || 0;
 
   return (
     <TooltipProvider>
