@@ -2,12 +2,11 @@ import AccountSettingForm from "@/components/settings/account-setting-form";
 import AdditionalSettingsSection from "@/components/settings/additional-settings-section";
 import EditProfileForm from "@/components/settings/edit-profile-form";
 import { ProfilePhotoUploader } from "@/components/settings/profile-photo-uploader";
+import { formatUrl } from "@/lib/url-utils";
 import { fetchAccountProfile } from "./fetch";
 
 const AccountSettingPage = async () => {
   const { data: accountProfile } = await fetchAccountProfile();
-
-  console.log({ accountProfile });
 
   return (
     <div className="space-y-8">
@@ -28,11 +27,7 @@ const AccountSettingPage = async () => {
           <div className="mb-2 font-medium">Profile photo</div>
 
           <ProfilePhotoUploader
-            photoUrl={
-              accountProfile.photo_profile
-                ? `http://${accountProfile.photo_profile}`
-                : null
-            }
+            photoUrl={formatUrl(accountProfile.photo_profile)}
             fullName={accountProfile.full_name}
           />
         </div>
@@ -53,14 +48,8 @@ const AccountSettingPage = async () => {
 
         <div className="col-span-4">
           <AdditionalSettingsSection
-            certificateUrl={
-              accountProfile.certificate ? accountProfile.certificate : null
-            }
-            nameCardUrl={
-              accountProfile.name_card
-                ? `http://${accountProfile.name_card}`
-                : null
-            }
+            certificateUrl={formatUrl(accountProfile.certificate)}
+            nameCardUrl={formatUrl(accountProfile.name_card)}
           />
         </div>
       </div>

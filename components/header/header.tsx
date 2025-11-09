@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchAccountProfile } from "@/app/(protected)/settings/fetch";
+import { formatUrl } from "@/lib/url-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -110,7 +111,7 @@ export const Header = () => {
                     user={{
                       name: dataProfile?.data.full_name || "User",
                       email: dataProfile?.data.email || "",
-                      avatar: dataProfile?.data.photo_profile || "",
+                      avatar: formatUrl(dataProfile?.data.photo_profile) || "",
                     }}
                   />
                 ) : (
