@@ -163,21 +163,58 @@ export const NameCardUploader: React.FC<NameCardUploaderProps> = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div className="relative inline-block w-full">
         <Card className="mt-2 border-2 border-dashed border-gray-300">
-          <CardContent className="flex h-32 items-center justify-center">
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2" disabled={isPending}>
-                <Upload className="h-4 w-4" />
-                {isPending ? "Uploading..." : "Upload Name Card"}
-              </Button>
-            </DialogTrigger>
+          <CardContent className="flex h-32 items-center justify-center p-0">
+            {displayNameCardUrl && !imageLoadError ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={displayNameCardUrl}
+                  alt="Name card preview"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                  onError={() => setImageLoadError(true)}
+                />
+                <div className="bg-opacity-30 absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+                  <DialogTrigger asChild>
+                    <Button
+                      className="flex items-center gap-2 bg-white text-black hover:bg-gray-200"
+                      disabled={isPending}
+                    >
+                      <Upload className="h-4 w-4" />
+                      {isPending ? "Uploading..." : "Change Name Card"}
+                    </Button>
+                  </DialogTrigger>
+                </div>
+              </div>
+            ) : imageLoadError ? (
+              <div className="flex h-full w-full flex-col items-center justify-center p-4 text-center">
+                <AlertCircle className="mb-2 h-8 w-8 text-gray-400" />
+                <p className="mb-2 text-sm text-gray-500">
+                  Failed to load image
+                </p>
+                <DialogTrigger asChild>
+                  <Button
+                    className="flex items-center gap-2"
+                    disabled={isPending}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {isPending ? "Uploading..." : "Upload Name Card"}
+                  </Button>
+                </DialogTrigger>
+              </div>
+            ) : (
+              <DialogTrigger asChild>
+                <Button
+                  className="flex items-center gap-2"
+                  disabled={isPending}
+                >
+                  <Upload className="h-4 w-4" />
+                  {isPending ? "Uploading..." : "Upload Name Card"}
+                </Button>
+              </DialogTrigger>
+            )}
           </CardContent>
         </Card>
-
-        {displayNameCardUrl && (
-          <div className="mt-2 text-sm text-gray-500">
-            Current file: {getFileExtension(nameCardUrl) || "Uploaded file"}
-          </div>
-        )}
       </div>
 
       <DialogContent className="sm:max-w-md">
