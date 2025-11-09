@@ -5,6 +5,7 @@ import {
   AddToCartRequest,
 } from "@/app/(protected)/hotel/[id]/actions";
 import { RoomType } from "@/app/(protected)/hotel/[id]/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
@@ -21,6 +22,7 @@ import { RoomImageGallery } from "./room-image-gallery";
 import { RoomOptions } from "./room-options";
 
 export default function RoomCard({ room }: { room: RoomType }) {
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<number>(0);
   const [roomQuantity, setRoomQuantity] = useState(1);
@@ -81,6 +83,9 @@ export default function RoomCard({ room }: { room: RoomType }) {
       const { success, message } = await addRoomToCart(body);
 
       if (success) {
+        queryClient.invalidateQueries({
+          queryKey: ["cart"],
+        });
         resetForm();
         toast.success(message || "Room added to cart successfully", {
           action: {
