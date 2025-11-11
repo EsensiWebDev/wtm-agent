@@ -10,6 +10,7 @@ import {
   contactUsSchema,
 } from "@/app/(protected)/contact-us/types";
 import { fetchAccountProfile } from "@/app/(protected)/settings/fetch";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -31,7 +33,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { Loader, Mail } from "lucide-react";
+import { Loader, Mail, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,6 +49,7 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
     data: dataProfile,
     isLoading: isLoadingProfile,
     isError: isErrorProfile,
+    error: errorProfile,
   } = useQuery({
     queryKey: ["profile"],
     queryFn: fetchAccountProfile,
@@ -73,6 +76,7 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
     data: dataBooking,
     isLoading: isLoadingBooking,
     isError: isErrorBooking,
+    error: errorBooking,
   } = useQuery({
     queryKey: ["booking"],
     queryFn: fetchUserBookings,
@@ -87,6 +91,7 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
     data: dataSubBookings,
     isLoading: isLoadingSubBookings,
     isError: isErrorSubBookings,
+    error: errorSubBookings,
   } = useQuery({
     queryKey: ["subBookings", booking_code],
     queryFn: () => fetchUserSubBookings(booking_code || ""),
@@ -128,6 +133,61 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  // Show skeleton loaders while profile is loading initially
+  if (isLoadingProfile) {
+    return (
+      <div className="mx-auto space-y-8">
+        <Skeleton className="h-10 w-48" />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="flex justify-end">
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if profile failed to load
+  if (isErrorProfile) {
+    return (
+      <div className="mx-auto">
+        <Alert variant="destructive">
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>Profile Load Error</AlertTitle>
+          <AlertDescription>
+            Failed to load your profile information. Please refresh the page or
+            try again later.
+            <br />
+            <span className="text-xs opacity-80">
+              Error: {errorProfile?.message || "Unknown error"}
+            </span>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -226,7 +286,7 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
           </div>
 
           {/* 4th Row: Booking Fields (Conditional) */}
-          {type === "booking" && dataBooking && (
+          {type === "booking" && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
@@ -236,63 +296,100 @@ const ContactUsForm = ({ urlBookingId }: ContactUsFormProps) => {
                     <FormLabel className="gap-0">
                       Select Booking <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full bg-white">
-                          <SelectValue placeholder="Choose your booking" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {dataBooking.map((booking) => (
-                          <SelectItem key={booking.value} value={booking.value}>
-                            {booking.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {/* Show loading state for bookings */}
+                    {isLoadingBooking ? (
+                      <Skeleton className="h-10 w-full" />
+                    ) : isErrorBooking ? (
+                      <Alert variant="destructive">
+                        <TriangleAlert className="h-4 w-4" />
+                        <AlertTitle>Booking Load Error</AlertTitle>
+                        <AlertDescription>
+                          Failed to load your bookings. Please try again later.
+                          <br />
+                          <span className="text-xs opacity-80">
+                            Error: {errorBooking?.message || "Unknown error"}
+                          </span>
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full bg-white">
+                            <SelectValue placeholder="Choose your booking" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {dataBooking?.map((booking) => (
+                            <SelectItem
+                              key={booking.value}
+                              value={booking.value}
+                            >
+                              {booking.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {booking_code && dataSubBookings && (
+              {booking_code && (
                 <FormField
                   control={form.control}
                   name="sub_booking_code"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Specific Booking Item (Optional)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger
-                            className="w-full bg-white"
-                            value={field.value}
-                            onReset={() => form.resetField("sub_booking_code")}
-                          >
-                            <SelectValue placeholder="Choose specific item (optional)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* <button
-                            onClick={() => form.resetField("subBookingId")}
-                            className="focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2"
-                          >
-                            Clear
-                          </button>
-                          <SelectSeparator /> */}
-                          {dataSubBookings.map((subBooking) => (
-                            <SelectItem
-                              key={subBooking.value}
-                              value={subBooking.value}
+                      {/* Show loading state for sub-bookings */}
+                      {isLoadingSubBookings ? (
+                        <Skeleton className="h-10 w-full" />
+                      ) : isErrorSubBookings ? (
+                        <Alert variant="destructive">
+                          <TriangleAlert className="h-4 w-4" />
+                          <AlertTitle>Sub-Booking Load Error</AlertTitle>
+                          <AlertDescription>
+                            Failed to load booking details. Please try again
+                            later.
+                            <br />
+                            <span className="text-xs opacity-80">
+                              Error:{" "}
+                              {errorSubBookings?.message || "Unknown error"}
+                            </span>
+                          </AlertDescription>
+                        </Alert>
+                      ) : (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className="w-full bg-white"
+                              value={field.value}
+                              onReset={() =>
+                                form.resetField("sub_booking_code")
+                              }
                             >
-                              {subBooking.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                              <SelectValue placeholder="Choose specific item (optional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dataSubBookings?.map((subBooking) => (
+                              <SelectItem
+                                key={subBooking.value}
+                                value={subBooking.value}
+                              >
+                                {subBooking.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
