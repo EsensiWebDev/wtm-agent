@@ -73,8 +73,10 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
     startTransition(async () => {
       toast.promise(removeFromCart(id), {
         loading: "Removing room from cart...",
-        success: ({ message }) =>
-          message || "Room removed from cart successfully!",
+        success: ({ message }) => {
+          queryClient.invalidateQueries({ queryKey: ["cart"] });
+          return message || "Room removed from cart successfully!";
+        },
         error: ({ message }) =>
           message || "Failed to remove room from cart. Please try again.",
       });
