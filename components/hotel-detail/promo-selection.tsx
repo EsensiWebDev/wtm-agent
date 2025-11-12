@@ -70,7 +70,7 @@ export function PromoSelection({
         />
 
         {/* Promo Options */}
-        {promos.map((promo) => (
+        {promos?.map((promo) => (
           <PromoOption
             key={String(promo.promo_id)}
             promo={promo}

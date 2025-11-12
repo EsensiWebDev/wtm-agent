@@ -14,6 +14,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { formatCurrency } from "@/lib/format";
+import { formatUrl } from "@/lib/url-utils";
 import { ChevronsLeft, ChevronsRight, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -209,7 +210,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
             </div>
           ) : (
             <Image
-              src={hotel.photo}
+              src={formatUrl(hotel.photo)}
               alt={`${hotel.name} hotel`}
               fill
               className="object-cover"

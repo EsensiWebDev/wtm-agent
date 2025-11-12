@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUrl } from "@/lib/url-utils";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -31,7 +32,7 @@ function ImageItem({
     >
       <Image
         alt="Hotel image"
-        src={src}
+        src={formatUrl(src)}
         className="absolute size-full object-cover group-hover:opacity-75"
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

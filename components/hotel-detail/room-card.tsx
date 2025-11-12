@@ -130,7 +130,7 @@ export default function RoomCard({ room }: { room: RoomType }) {
               selectedOption={selectedRoom}
               onOptionChange={setSelectedRoom}
               radioGroupName={radioGroupName}
-              promo={room.promos.find(
+              promo={room.promos?.find(
                 (p) => String(p.promo_id) === selectedPromo,
               )}
             />

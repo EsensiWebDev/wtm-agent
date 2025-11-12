@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUrl } from "@/lib/url-utils";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -36,7 +37,7 @@ function ImageWithFallback({
 
   return (
     <Image
-      src={src}
+      src={formatUrl(src)}
       alt={alt}
       className={className}
       fill={fill}

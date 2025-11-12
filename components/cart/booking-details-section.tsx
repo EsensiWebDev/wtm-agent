@@ -18,30 +18,28 @@ import Image from "next/image";
 import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useGuests } from "./guest-context";
-import { IconMoon, IconRosetteDiscount } from "@tabler/icons-react";
+import { IconMoon } from "@tabler/icons-react";
 import ViewInvoiceDialog from "@/components/history-booking/dialog/view-invoice-dialog";
+import { fetchCart } from "@/app/(protected)/cart/fetch";
 
 interface BookingDetailsSectionProps {
-  bookingDetailsList: BookingDetail[];
+  cartData: Awaited<ReturnType<typeof fetchCart>>["data"];
 }
 
-const BookingDetailsSection = ({
-  bookingDetailsList,
-}: BookingDetailsSectionProps) => {
+const BookingDetailsSection = ({ cartData }: BookingDetailsSectionProps) => {
+  console.log({ detail: cartData.detail });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Booking Details</h2>
       </div>
       <div className="grid gap-6 sm:gap-8">
-        {bookingDetailsList.map((bookingDetails) => (
-          <HotelRoomCard
-            key={bookingDetails.id}
-            bookingDetails={bookingDetails}
-          />
+        {cartData.detail.map((detail) => (
+          <HotelRoomCard key={detail.id} bookingDetails={detail} />
         ))}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-5">
-          <BookingGrandTotalCard bookingDetailsList={bookingDetailsList} />
+          <BookingGrandTotalCard cartData={cartData} />
         </div>
       </div>
     </div>
@@ -49,7 +47,9 @@ const BookingDetailsSection = ({
 };
 
 interface HotelRoomCardProps {
-  bookingDetails: BookingDetail;
+  bookingDetails: Awaited<
+    ReturnType<typeof fetchCart>
+  >["data"]["detail"][number];
 }
 
 const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
@@ -60,10 +60,11 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
   const couponDiscount = {
     code: "3D2NIGHT15",
     percentage: 15,
-    amount: Math.floor(bookingDetails.totalPrice * 0.15),
+    // amount: Math.floor(bookingDetails.totalPrice * 0.15),
+    amount: bookingDetails.price,
   };
 
-  const discountedPrice = bookingDetails.totalPrice - couponDiscount.amount;
+  const discountedPrice = bookingDetails.price - couponDiscount.amount;
 
   const onRemove = async () => {
     startTransition(async () => {
@@ -80,22 +81,36 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
     }).format(price);
   };
 
+  // Calculate the number of nights between check_in_date and check_out_date
+  const calculateNights = (checkIn: string, checkOut: string): number => {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const timeDiff = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+    return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+  };
+
+  const nights = calculateNights(
+    bookingDetails.check_in_date,
+    bookingDetails.check_out_date,
+  );
+
   return (
     <div className="grid gap-4 sm:gap-6 md:grid-cols-5">
       <div className="col-span-3 gap-0 p-0">
         <Card className="gap-0 p-0">
           <div className="p-6">
             <span className="text-yellow-500">
-              {"★".repeat(bookingDetails.rating)}
+              {"★".repeat(bookingDetails.hotel_rating)}
             </span>
             <h3 className="font-semibold">
-              {bookingDetails.hotelName} | {bookingDetails.roomType}
+              {bookingDetails.hotel_name} | {bookingDetails.room_type_name}
             </h3>
           </div>
           <div className="relative aspect-[3/1] overflow-hidden rounded-b-xl">
             <Image
-              src={bookingDetails.imageSrc}
-              alt={bookingDetails.hotelName}
+              src={"/hotel-detail/WTM Prototype.png"}
+              // src={bookingDetails.imageSrc}
+              alt={bookingDetails.hotel_name}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -104,7 +119,8 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
         </Card>
         <div className="mt-4 flex flex-1 justify-end bg-transparent text-sm text-red-500">
           Cancelation Period until{" "}
-          {format(bookingDetails.cancellationPeriod, "dd MMM yyyy")}
+          {/* {format(bookingDetails.cancellationPeriod, "dd MMM yyyy")} */}
+          {format(new Date(), "dd MMM yyyy")}
         </div>
       </div>
       <Card className="relative col-span-2 flex flex-col gap-0 p-0">
@@ -128,9 +144,11 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
           <div className="w-full rounded-lg bg-gray-200 p-4 text-center md:flex-1">
             <div className="text-muted-foreground text-xs">Check-in</div>
             <div className="text-sm font-medium">
-              {format(bookingDetails.checkIn, "eee, MMMM d yyyy")}
+              {format(bookingDetails.check_in_date, "eee, MMMM d yyyy")}
             </div>
-            <div className="text-xs">{bookingDetails.checkInTime}</div>
+            <div className="text-xs">
+              {format(bookingDetails.check_in_date, "HH:mm")} WIB
+            </div>
           </div>
 
           <div className="flex items-center md:flex-col">
@@ -138,28 +156,14 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
               <div className="h-[1px] w-4 bg-gray-600"></div>
               <div className="flex items-center justify-center rounded-full border border-gray-300 px-2 py-1 text-xs dark:border-gray-600">
                 <IconMoon className="mr-1 h-3 w-3" />
-                {Math.max(
-                  1,
-                  Math.ceil(
-                    (+bookingDetails.checkOut - +bookingDetails.checkIn) /
-                      (1000 * 60 * 60 * 24),
-                  ),
-                )}{" "}
-                Night
+                {nights} Night
               </div>
               <div className="h-[1px] w-4 bg-gray-600"></div>
             </div>
             <div className="flex items-center md:hidden">
               <div className="flex items-center justify-center rounded-full border border-gray-300 px-2 py-1 text-xs dark:border-gray-600">
                 <Clock className="mr-1 h-3 w-3" />
-                {Math.max(
-                  1,
-                  Math.ceil(
-                    (+bookingDetails.checkOut - +bookingDetails.checkIn) /
-                      (1000 * 60 * 60 * 24),
-                  ),
-                )}{" "}
-                Night
+                {nights} Night
               </div>
             </div>
           </div>
@@ -167,9 +171,11 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
           <div className="w-full rounded-lg bg-gray-200 p-4 text-center md:flex-1">
             <div className="text-muted-foreground text-xs">Check-out</div>
             <div className="text-sm font-medium">
-              {format(bookingDetails.checkOut, "eee, MMMM d yyyy")}
+              {format(bookingDetails.check_out_date, "eee, MMMM d yyyy")}
             </div>
-            <div className="text-xs">{bookingDetails.checkOutTime}</div>
+            <div className="text-xs">
+              {format(bookingDetails.check_out_date, "HH:mm")} WIB
+            </div>
           </div>
         </div>
 
@@ -178,45 +184,37 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
             Room Selected
           </span>
 
-          {/* Room Details */}
-          {bookingDetails.rooms.map((room) => (
-            <div key={room.id} className="col-span-1 md:col-span-2">
-              <div className="leading-tight">
-                <div className="text-sm leading-tight font-medium">
-                  ({room.quantity}x) {room.name}
-                </div>
-                <div className="text-xs leading-tight font-extralight">
-                  {room.includes.join(" | ")} | {room.features.join(" | ")}
-                </div>
+          <div className="col-span-1 md:col-span-2">
+            <div className="leading-tight">
+              <div className="text-sm leading-tight font-medium">
+                {bookingDetails.room_type_name}
+              </div>
+              <div className="text-xs leading-tight font-extralight">
+                {bookingDetails.is_breakfast ? "Breakfast Included" : ""}
               </div>
             </div>
-          ))}
-          {bookingDetails.rooms.map((room) => (
-            <div
-              key={room.id}
-              className="flex text-sm md:flex-col md:justify-start"
-            >
-              <span className="text-right text-sm font-medium">
-                {formatPrice(room.price)}
-              </span>
-            </div>
-          ))}
+          </div>
+
+          <div className="flex text-sm md:flex-col md:justify-start">
+            <span className="text-right text-sm font-medium">
+              {formatPrice(bookingDetails.price)}
+            </span>
+          </div>
 
           {/* Additional Services */}
-          {bookingDetails.additionalServices.map((service) => (
-            <div key={service.id} className="col-span-1 md:col-span-2">
-              <span className="text-sm font-medium">{service.name}</span>
-            </div>
-          ))}
-          {bookingDetails.additionalServices.map((service) => (
-            <div
-              key={service.id}
-              className="flex text-sm md:flex-col md:justify-start"
+          {bookingDetails.additional.map((additional, idx) => (
+            <React.Fragment
+              key={`${bookingDetails.room_type_name}-additional-${idx}`}
             >
-              <span className="text-right text-sm font-medium">
-                {formatPrice(service.price)}
-              </span>
-            </div>
+              <div className="col-span-1 md:col-span-2">
+                <span className="text-sm font-medium">{additional.name}</span>
+              </div>
+              <div className="flex text-sm md:flex-col md:justify-start">
+                <span className="text-right text-sm font-medium">
+                  {formatPrice(additional.price)}
+                </span>
+              </div>
+            </React.Fragment>
           ))}
 
           <div className="mt-4 flex items-center gap-4">
@@ -248,7 +246,7 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
               <div className="text-sm font-medium text-gray-800">
                 Total Room Price
               </div>
-              {bookingDetails.id === "booking-2" && (
+              {/* {bookingDetails.id === "booking-2" && (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 rounded-full bg-gray-700 px-3 py-1 text-xs font-medium text-white">
                     <IconRosetteDiscount className="h-4 w-4" />
@@ -258,28 +256,16 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
                     {formatPrice(bookingDetails.totalPrice)}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Second row: Room/night details and discounted price */}
             <div className="flex items-center justify-between">
               <div className="text-xs text-gray-500">
-                {bookingDetails.rooms.reduce(
-                  (total, room) => total + room.quantity,
-                  0,
-                )}{" "}
-                room(s),{" "}
-                {Math.max(
-                  1,
-                  Math.ceil(
-                    (+bookingDetails.checkOut - +bookingDetails.checkIn) /
-                      (1000 * 60 * 60 * 24),
-                  ),
-                )}{" "}
-                night
+                1 room(s), {nights} night(s)
               </div>
               <div className="text-lg font-bold text-gray-800">
-                {formatPrice(discountedPrice)}
+                {formatPrice(bookingDetails.total_price)}
               </div>
             </div>
           </div>
@@ -290,9 +276,9 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
 };
 
 const BookingGrandTotalCard = ({
-  bookingDetailsList,
+  cartData,
 }: {
-  bookingDetailsList: BookingDetail[];
+  cartData: Awaited<ReturnType<typeof fetchCart>>["data"];
 }) => {
   const [isPending, startTransition] = useTransition();
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
@@ -301,16 +287,26 @@ const BookingGrandTotalCard = ({
 
   // Function to convert BookingDetail to HistoryBooking for invoice generation
   const convertToHistoryBooking = (
-    bookingDetails: BookingDetail[],
+    bookingDetailsList: BookingDetail[],
   ): HistoryBooking => {
     return {
-      id: `booking-${Date.now()}`,
-      number: Math.floor(Math.random() * 1000) + 1,
-      guestName: "John Doe", // This would come from guest context in real app
-      bookingId: `1`,
-      bookingStatus: "approved" as const,
-      paymentStatus: "unpaid" as const,
-      notes: `Booking for ${bookingDetails.map((b) => b.hotelName).join(", ")}`,
+      booking_code: `booking-${Date.now()}`,
+      booking_id: Math.floor(Math.random() * 1000) + 1,
+      booking_status: "approved",
+      detail: [
+        {
+          additional: [],
+          agent_name: "Agent Name",
+          booking_status: "approved",
+          cancellation_date: new Date().toISOString(),
+          guest_name: "John Doe",
+          hotel_name: bookingDetailsList.map((b) => b.hotelName).join(", "),
+          payment_status: "unpaid",
+          sub_booking_id: "1",
+        },
+      ],
+      guest_name: ["John Doe"], // This would come from guest context in real app
+      payment_status: "unpaid",
     };
   };
 
@@ -319,13 +315,13 @@ const BookingGrandTotalCard = ({
       await delay(1000);
 
       // Generate dummy booking data for invoice
-      const historyBooking = convertToHistoryBooking(bookingDetailsList);
-      setGeneratedBooking(historyBooking);
+      // const historyBooking = convertToHistoryBooking(cartData);
+      // setGeneratedBooking(historyBooking);
 
       toast.success("Checkout Success - Invoice Generated!");
 
       // Show invoice dialog
-      setShowInvoiceDialog(true);
+      // setShowInvoiceDialog(true);
     });
   };
 
@@ -337,46 +333,43 @@ const BookingGrandTotalCard = ({
     }).format(price);
   };
 
-  const grandTotal = bookingDetailsList.reduce(
-    (sum, b) => sum + b.totalPrice,
-    0,
-  );
+  // const grandTotal = cartData.reduce((sum, b) => sum + b.totalPrice, 0);
 
-  // Calculate total discount across all bookings
-  const totalDiscount = bookingDetailsList.reduce(
-    (sum, booking) => sum + Math.floor(booking.totalPrice * 0.15),
-    0,
-  );
+  // // Calculate total discount across all bookings
+  // const totalDiscount = cartData.reduce(
+  //   (sum, booking) => sum + Math.floor(booking.totalPrice * 0.15),
+  //   0,
+  // );
 
-  const discountedGrandTotal = grandTotal - totalDiscount;
+  // const discountedGrandTotal = grandTotal - totalDiscount;
 
   return (
     <div className="md:col-span-2 md:col-end-6">
       <Card className="relative flex flex-col gap-0 p-0">
         <div className="my-4 grid grid-cols-1 gap-2 space-y-3 px-6 md:grid-cols-3 md:gap-0">
-          {bookingDetailsList.map((booking) => (
-            <React.Fragment key={`${booking.id}-fragment`}>
+          {cartData.detail.map((detail) => (
+            <React.Fragment key={`${detail.id}-fragment`}>
               <div
-                key={booking.id + "-name"}
+                key={detail.id + "-name"}
                 className="col-span-1 md:col-span-2"
               >
                 <div className="leading-tight">
                   <div className="leading-tight font-medium">
-                    {booking.hotelName}
+                    {detail.hotel_name}
                   </div>
                   <div className="text-xs leading-tight font-extralight">
-                    {booking.roomType}
-                    {booking.additionalServices.length > 0 &&
-                      ` + ${booking.additionalServices.map((s) => s.name).join(" + ")}`}
+                    {detail.room_type_name}
+                    {detail.additional.length > 0 &&
+                      ` + ${detail.additional.map((s) => s.name).join(" + ")}`}
                   </div>
                 </div>
               </div>
               <div
-                key={booking.id + "-price"}
+                key={detail.id + "-price"}
                 className="flex text-sm md:flex-col md:justify-start"
               >
                 <span className="text-right font-medium">
-                  {formatPrice(booking.totalPrice)}
+                  {formatPrice(detail.total_price)}
                 </span>
               </div>
             </React.Fragment>
@@ -388,7 +381,7 @@ const BookingGrandTotalCard = ({
           </div>
           <div className="flex h-full md:flex-col md:justify-end">
             <span className="text-right text-lg font-bold">
-              {formatPrice(discountedGrandTotal)}
+              {formatPrice(cartData.grand_total)}
             </span>
           </div>
         </CardFooter>

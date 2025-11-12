@@ -2,7 +2,6 @@
 
 import { apiCall } from "@/lib/api";
 import { UserAccountData } from "./types";
-import { delay } from "@/lib/utils";
 
 export async function fetchUserAccount(): Promise<UserAccountData> {
   // Simulate fetching user account data
