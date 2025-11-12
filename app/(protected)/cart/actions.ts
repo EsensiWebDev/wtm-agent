@@ -249,3 +249,49 @@ export const removeGuest = async (input: {
     };
   }
 };
+
+export const selectGuest = async (input: {
+  sub_cart_id: number;
+  guest: string;
+}) => {
+  const body = {
+    ...input,
+  };
+
+  try {
+    const response = await apiCall(`bookings/cart/sub-guest`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+
+    if (response.status !== 200) {
+      return {
+        success: false,
+        message: response.message || "Failed to select guest",
+      };
+    }
+
+    revalidatePath("/cart", "layout");
+
+    return {
+      success: true,
+      message: response.message || "Guest has been successfully selected",
+    };
+  } catch (error) {
+    console.error("Error selecting guest:", error);
+
+    // Handle API error responses with specific messages
+    if (error && typeof error === "object" && "message" in error) {
+      return {
+        success: false,
+        message: error.message as string,
+      };
+    }
+
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to select guest",
+    };
+  }
+};

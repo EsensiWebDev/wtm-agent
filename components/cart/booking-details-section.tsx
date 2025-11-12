@@ -11,17 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { delay } from "@/lib/utils";
 import { format } from "date-fns";
 import { Clock, Loader2, Trash2 } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useGuests } from "./guest-context";
 import { IconMoon } from "@tabler/icons-react";
 import ViewInvoiceDialog from "@/components/history-booking/dialog/view-invoice-dialog";
 import { fetchCart } from "@/app/(protected)/cart/fetch";
-import { checkoutCart, removeFromCart } from "@/app/(protected)/cart/actions";
+import {
+  checkoutCart,
+  removeFromCart,
+  selectGuest,
+} from "@/app/(protected)/cart/actions";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface BookingDetailsSectionProps {
@@ -29,8 +31,6 @@ interface BookingDetailsSectionProps {
 }
 
 const BookingDetailsSection = ({ cartData }: BookingDetailsSectionProps) => {
-  console.log({ detail: cartData.detail });
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -38,7 +38,11 @@ const BookingDetailsSection = ({ cartData }: BookingDetailsSectionProps) => {
       </div>
       <div className="grid gap-6 sm:gap-8">
         {cartData.detail.map((detail) => (
-          <HotelRoomCard key={detail.id} bookingDetails={detail} />
+          <HotelRoomCard
+            key={detail.id}
+            bookingDetails={detail}
+            guests={cartData.guest}
+          />
         ))}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-5">
           <BookingGrandTotalCard cartData={cartData} />
@@ -52,12 +56,13 @@ interface HotelRoomCardProps {
   bookingDetails: Awaited<
     ReturnType<typeof fetchCart>
   >["data"]["detail"][number];
+  guests: string[];
 }
 
-const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
+const HotelRoomCard = ({ bookingDetails, guests }: HotelRoomCardProps) => {
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
-  const { guestNames } = useGuests();
+  const [isSelecting, startSelectTransition] = useTransition();
 
   // Sample coupon data - in real app this would come from props or API
   const couponDiscount = {
@@ -79,6 +84,22 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
         },
         error: ({ message }) =>
           message || "Failed to remove room from cart. Please try again.",
+      });
+    });
+  };
+
+  const onSelect = async (id: number, guest: string) => {
+    console.log("Selecting guest for room with ID:", id, "and guest:", guest);
+
+    startSelectTransition(async () => {
+      toast.promise(selectGuest({ sub_cart_id: Number(id), guest: guest }), {
+        loading: "Selecting guest...",
+        success: ({ message }) => {
+          queryClient.invalidateQueries({ queryKey: ["cart"] });
+          return message || "Guest selected successfully!";
+        },
+        error: ({ message }) =>
+          message || "Failed to select guest. Please try again.",
       });
     });
   };
@@ -229,14 +250,18 @@ const HotelRoomCard = ({ bookingDetails }: HotelRoomCardProps) => {
 
           <div className="mt-4 flex items-center gap-4">
             <span className="text-sm whitespace-nowrap">Guest Name</span>
-            <Select>
+            <Select
+              defaultValue={bookingDetails.guest}
+              disabled={isSelecting}
+              onValueChange={(value) => onSelect(bookingDetails.id, value)}
+            >
               <SelectTrigger className="w-[180px] border-none shadow-none">
                 <SelectValue placeholder="Select Guest" />
               </SelectTrigger>
               <SelectContent>
-                {guestNames.length > 0 ? (
-                  guestNames.map((guestName, index) => (
-                    <SelectItem key={index} value={`guest-${index}`}>
+                {guests ? (
+                  guests.map((guestName, index) => (
+                    <SelectItem key={`${guestName}-${index}`} value={guestName}>
                       {guestName}
                     </SelectItem>
                   ))

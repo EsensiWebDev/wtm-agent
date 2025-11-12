@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import React from "react";
 import { SelectUserDialog } from "./dialog/select-user-dialog";
-import { useGuests } from "./guest-context";
 import { ContactDetailsTable } from "./table/contact-details-table";
 import { toast } from "sonner";
 import { addGuest } from "@/app/(protected)/cart/actions";
