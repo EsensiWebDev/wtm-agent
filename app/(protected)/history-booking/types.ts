@@ -1,6 +1,7 @@
 import { SearchParams } from "@/types";
 
 export interface HistoryBooking {
+  notes?: string;
   booking_code: string;
   booking_id: number;
   booking_status: string;

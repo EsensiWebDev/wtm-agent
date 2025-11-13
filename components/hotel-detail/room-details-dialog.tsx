@@ -69,7 +69,7 @@ const ImageWithFallback: React.FC<{
 
   return (
     <Image
-      src={formatUrl(src)}
+      src={formatUrl(src) || ""}
       alt={alt}
       className={className}
       fill={fill}

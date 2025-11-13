@@ -26,13 +26,15 @@ function ImageItem({
     );
   }
 
+  const formattedSrc = formatUrl(src);
+
   return (
     <div
       className={`group relative aspect-1/1 overflow-hidden rounded ${className}`}
     >
       <Image
         alt="Hotel image"
-        src={formatUrl(src)}
+        src={formattedSrc || ""}
         className="absolute size-full object-cover group-hover:opacity-75"
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

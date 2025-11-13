@@ -28,16 +28,16 @@ const ViewReceiptDialog: React.FC<ViewReceiptDialogProps> = ({
           {booking ? (
             <>
               <div>
-                <strong>Booking ID:</strong> {booking.bookingId}
+                <strong>Booking ID:</strong> {booking.booking_id}
               </div>
               <div>
-                <strong>Guest Name:</strong> {booking.guestName}
+                <strong>Guest Name:</strong> {booking.guest_name}
               </div>
               <div>
-                <strong>Status:</strong> {booking.bookingStatus}
+                <strong>Status:</strong> {booking.payment_status}
               </div>
               <div>
-                <strong>Payment:</strong> {booking.paymentStatus}
+                <strong>Payment:</strong> {booking.payment_status}
               </div>
               <div className="mt-4">(Receipt details go here...)</div>
             </>

@@ -37,7 +37,7 @@ function ImageWithFallback({
 
   return (
     <Image
-      src={formatUrl(src)}
+      src={formatUrl(src) || ""}
       alt={alt}
       className={className}
       fill={fill}

@@ -19,6 +19,7 @@ type RemoteUser = {
   photo_url: string | null;
   first_name: string | null;
   last_name: string | null;
+  full_name: string | null;
   // TODO: Check this type error for now we include id, accessToken, refreshToken, accessTokenExpires
   id: string;
   name?: string | null;
