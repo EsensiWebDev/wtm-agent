@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -97,6 +98,7 @@ const HotelList = ({ promise }: HotelListProps) => {
   const handlePrev = () => {
     if (page > 1) setPage(page - 1);
   };
+
   const handleNext = () => {
     if (page < pageCount) setPage(page + 1);
   };
@@ -104,6 +106,48 @@ const HotelList = ({ promise }: HotelListProps) => {
   const handleLast = () => {
     if (page < pageCount) setPage(pageCount);
   };
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const delta = 2; // Number of pages to show around current page
+    const range = [];
+    const rangeWithDots = [];
+
+    // Always include first and last page
+    for (
+      let i = Math.max(2, page - delta);
+      i <= Math.min(pageCount - 1, page + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    // Add first page
+    if (pageCount >= 1) {
+      rangeWithDots.push(1);
+    }
+
+    // Add dots if needed
+    if (range.length > 0 && range[0] > 2) {
+      rangeWithDots.push("ellipsis");
+    }
+
+    rangeWithDots.push(...range);
+
+    // Add dots if needed
+    if (range.length > 0 && range[range.length - 1] < pageCount - 1) {
+      rangeWithDots.push("ellipsis");
+    }
+
+    // Add last page
+    if (pageCount > 1) {
+      rangeWithDots.push(pageCount);
+    }
+
+    return rangeWithDots;
+  };
+
+  const pageNumbers = getPageNumbers();
 
   return (
     <>
@@ -127,11 +171,9 @@ const HotelList = ({ promise }: HotelListProps) => {
                 size="icon"
                 className="hidden size-8 lg:flex"
                 disabled={page <= 1}
-                onClick={() => {
-                  handleFirst();
-                }}
+                onClick={handleFirst}
               >
-                <ChevronsLeft />
+                <ChevronsLeft className="size-4" />
               </Button>
             </PaginationItem>
             <PaginationItem>
@@ -145,11 +187,26 @@ const HotelList = ({ promise }: HotelListProps) => {
                 className={page <= 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                {page}
-              </PaginationLink>
-            </PaginationItem>
+
+            {pageNumbers.map((pageNumber, index) => (
+              <PaginationItem key={index}>
+                {pageNumber === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    href="#"
+                    isActive={pageNumber === page}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage(pageNumber as number);
+                    }}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
             <PaginationItem>
               <PaginationNext
                 href="#"
@@ -165,16 +222,14 @@ const HotelList = ({ promise }: HotelListProps) => {
             </PaginationItem>
             <PaginationItem>
               <Button
-                aria-label="Go to first page"
+                aria-label="Go to last page"
                 variant="ghost"
                 size="icon"
                 className="hidden size-8 lg:flex"
                 disabled={page >= pageCount}
-                onClick={() => {
-                  handleLast();
-                }}
+                onClick={handleLast}
               >
-                <ChevronsRight />
+                <ChevronsRight className="size-4" />
               </Button>
             </PaginationItem>
           </PaginationContent>
@@ -210,7 +265,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
             </div>
           ) : (
             <Image
-              src={formatUrl(hotel.photo)}
+              src={formatUrl(hotel.photo) || ""}
               alt={`${hotel.name} hotel`}
               fill
               className="object-cover"

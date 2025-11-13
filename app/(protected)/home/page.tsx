@@ -25,11 +25,17 @@ const HomePage = async (props: HomePageProps) => {
       <div>
         <div className="py-4">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            <React.Suspense fallback="Loading...">
+            <React.Suspense
+              fallback="Loading..."
+              key={`filter-${JSON.stringify(searchParams)}`}
+            >
               <FilterSidebar promise={hotelsPromise} />
             </React.Suspense>
 
-            <React.Suspense fallback="Loading...">
+            <React.Suspense
+              fallback="Loading..."
+              key={`results-${JSON.stringify(searchParams)}`}
+            >
               <HotelResults promise={hotelsPromise} />
             </React.Suspense>
           </div>
