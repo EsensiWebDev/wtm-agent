@@ -2,6 +2,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/context/AuthContext";
 import authOptions from "@/lib/auth";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
@@ -41,15 +42,17 @@ export default async function RootLayout({
         <NuqsAdapter>
           <QueryProvider>
             <AuthSessionProvider session={session}>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                enableSystem={false}
-                disableTransitionOnChange
-              >
-                {children}
-                <Toaster />
-              </ThemeProvider>
+              <AuthProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="light"
+                  enableSystem={false}
+                  disableTransitionOnChange
+                >
+                  {children}
+                  <Toaster />
+                </ThemeProvider>
+              </AuthProvider>
             </AuthSessionProvider>
           </QueryProvider>
         </NuqsAdapter>
