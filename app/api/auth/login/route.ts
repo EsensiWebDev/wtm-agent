@@ -14,20 +14,18 @@ export async function POST(req: NextRequest) {
 
   const data = await res.json();
 
-  // Forward the cookie from backend to client
+  // Create response
   const response = NextResponse.json(data, { status: res.status });
 
+  // Forward the refresh token cookie from backend to client
   const refreshToken = res.headers.get("set-cookie");
   if (refreshToken) {
     response.headers.set("set-cookie", refreshToken);
+    response.headers.append(
+      "set-cookie",
+      `access_token=${data.data.token}; Path=/; Max-Age=1740; HttpOnly`,
+    );
   }
-
-  // if (res.status !== 200) {
-  //   return NextResponse.json(
-  //     { error: data.message || "Login failed" },
-  //     { status: res.status },
-  //   );
-  // }
 
   return response;
 }

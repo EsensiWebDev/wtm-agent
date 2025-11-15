@@ -21,8 +21,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refresh = async () => {
     try {
-      const data = await api("/api/refresh-token", { method: "GET" });
-      setAccessToken(data.token);
+      const data = await api("/api/auth/refresh-token", { method: "GET" });
+      setAccessToken(data.data.token);
     } catch (err) {
       console.error("refresh() failed:", err);
       setAccessToken(null);
