@@ -58,6 +58,9 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
   const [selectedSubBookingId, setSelectedSubBookingId] = React.useState<
     string | null
   >(null);
+  const [cancelSubBookingId, setCancelSubBookingId] = React.useState<
+    string | null
+  >(null);
 
   const handleViewInvoice = (booking: HistoryBooking) => {
     setInvoiceDialogOpen(true);
@@ -67,20 +70,22 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
     setReceiptDialogOpen(true);
   };
 
-  const handleCancelClick = () => {
+  const handleCancelClick = (subBookingId: string) => {
+    setCancelSubBookingId(subBookingId);
     setConfirmDialogOpen(true);
   };
 
   const handleCancelConfirm = async () => {
-    if (!booking) return;
+    if (!booking || !cancelSubBookingId) return;
 
     setIsLoading(true);
     try {
-      const result = await cancelBookingAction(String(booking.booking_id));
+      const result = await cancelBookingAction(cancelSubBookingId);
 
       if (result.success) {
         toast.success(result.message);
         setConfirmDialogOpen(false);
+        setCancelSubBookingId(null);
         onOpenChange(false); // Close the detail dialog
       } else {
         toast.error(result.message);
@@ -94,6 +99,7 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
 
   const handleCancelDialogClose = () => {
     setConfirmDialogOpen(false);
+    setCancelSubBookingId(null);
   };
 
   const handleUploadReceipt = (subBookingId: string) => {
@@ -289,7 +295,9 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 variant="destructive"
-                                onSelect={handleCancelClick}
+                                onSelect={() =>
+                                  handleCancelClick(detail.sub_booking_id)
+                                }
                               >
                                 <IconCancel className="mr-2 h-4 w-4" />
                                 Cancel Booking
@@ -357,8 +365,8 @@ const ViewDetailDialog: React.FC<ViewDetailDialogProps> = ({
         onConfirm={handleCancelConfirm}
         onCancel={handleCancelDialogClose}
         isLoading={isLoading}
-        title={`Are you sure you want to cancel booking ${booking?.booking_code}?`}
-        description={`This action cannot be undone and the booking will be permanently cancelled.`}
+        title={`Are you sure you want to cancel sub-booking ${cancelSubBookingId}?`}
+        description={`This action cannot be undone and the sub-booking will be permanently cancelled.`}
       />
     </Dialog>
   );
