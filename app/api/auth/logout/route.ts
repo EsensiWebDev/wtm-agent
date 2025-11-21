@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   // const token = req.headers.get("authorization");
-  // console.log({ token });
 
   // const res = await fetch("http://54.255.206.242:4816/api/logout", {
   //   method: "POST",

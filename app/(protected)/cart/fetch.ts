@@ -97,9 +97,6 @@ export async function saveContactDetails(
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 800));
 
-  // Simulate saving data
-  console.log("Saving contact details:", guests);
-
   return {
     success: true,
     message: "Contact details saved successfully",

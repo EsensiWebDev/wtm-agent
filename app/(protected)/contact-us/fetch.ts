@@ -52,8 +52,6 @@ export async function fetchUserSubBookings(
     },
   });
 
-  console.log({ data: apiResponse.data });
-
   if (apiResponse.status === 200 && Array.isArray(apiResponse.data)) {
     return apiResponse.data.map((id) => ({
       label: id,

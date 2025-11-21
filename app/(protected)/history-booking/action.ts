@@ -11,9 +11,6 @@ export async function cancelBookingAction(
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Dummy implementation - in real app, this would make API call
-    console.log(`Cancelling booking: ${bookingId}`);
-
     // Simulate random success/failure for demonstration
     const isSuccess = Math.random() > 0.1; // 90% success rate
 

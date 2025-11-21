@@ -32,9 +32,7 @@ interface HotelResultsProps {
 const HotelResults = ({ promise }: HotelResultsProps) => {
   const hotelsData = React.use(promise);
 
-  const { data, status, message } = hotelsData;
-
-  console.log({ data });
+  const { status } = hotelsData;
 
   if (status !== 200) return "Error loading data";
 
@@ -288,9 +286,9 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
   const href = `/hotel/${hotel.id}?${stringQuery}`;
 
   return (
-    <Link href={href}>
-      <Card className="gap-0 overflow-hidden rounded py-0 hover:opacity-75">
-        <div className="relative aspect-[2/1]">
+    <Link href={href} className="flex">
+      <Card className="flex h-full w-full flex-col gap-0 overflow-hidden rounded py-0 hover:opacity-75">
+        <div className="relative aspect-[2/1] flex-shrink-0">
           {imgError || !hotel.photo ? (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
               <span className="text-gray-500">Image not found</span>
@@ -307,12 +305,12 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
           )}
         </div>
 
-        <div className="flex flex-col gap-1 p-4">
+        <div className="flex flex-grow flex-col gap-1 p-4">
           <span className="text-yellow-500">{"★".repeat(hotel.rating)}</span>
           <h3 className="text-lg font-semibold">{hotel.name}</h3>
           <p className="text-muted-foreground text-sm">{hotel.address}</p>
 
-          <div className="mt-2 text-sm">
+          <div className="mt-auto pt-2 text-sm">
             <div className="text-xs">
               Start from{" "}
               <span className="text-base font-semibold">

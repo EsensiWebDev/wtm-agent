@@ -113,8 +113,6 @@ export async function changeLanguage(
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  console.log("Language change input:", input);
-
   // Simulate success response
   return {
     success: true,
@@ -211,8 +209,6 @@ export async function uploadCertificate(
       body,
     });
 
-    console.log({ response });
-
     if (response.status !== 200) {
       return {
         success: false,
@@ -271,8 +267,6 @@ export async function uploadNameCard(
       },
       body,
     });
-
-    console.log({ response });
 
     if (response.status !== 200) {
       return {

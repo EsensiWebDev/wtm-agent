@@ -129,8 +129,6 @@ export async function checkoutCart(): Promise<ActionResponse<void>> {
       },
     });
 
-    console.log({ data: response.data });
-
     if (response.status !== 200) {
       return {
         success: false,

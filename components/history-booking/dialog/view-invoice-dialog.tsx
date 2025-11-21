@@ -139,7 +139,6 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
         newInvoiceData as NewInvoiceData,
         (step) => {
           // Optional: You could show progress here if needed
-          console.log("PDF Generation:", step);
         },
       );
 

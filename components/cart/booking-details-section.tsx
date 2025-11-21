@@ -88,8 +88,6 @@ const HotelRoomCard = ({ bookingDetails, guests }: HotelRoomCardProps) => {
   };
 
   const onSelect = async (id: number, guest: string) => {
-    console.log("Selecting guest for room with ID:", id, "and guest:", guest);
-
     startSelectTransition(async () => {
       toast.promise(selectGuest({ sub_cart_id: Number(id), guest: guest }), {
         loading: "Selecting guest...",

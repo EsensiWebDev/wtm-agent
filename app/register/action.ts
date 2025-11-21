@@ -1,7 +1,7 @@
 "use server";
 
-import { type RegisterResponse } from "./type";
 import { ApiResponse } from "@/types";
+import { type RegisterResponse } from "./type";
 
 const AUTH_API_BASE_URL =
   process.env.AUTH_API_BASE_URL ?? "http://54.255.206.242:4816/api";
@@ -25,8 +25,6 @@ export async function registerAction(
 
     const apiResponse: ApiResponse<{ message: string; status: number }> =
       await response.json();
-
-    console.log({ apiResponse });
 
     if (apiResponse.status !== 200) {
       return {
