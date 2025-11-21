@@ -23,6 +23,7 @@ import {
   ChevronsUpDown,
   CirclePercent,
   MapPin,
+  RotateCcw,
   Search,
   Users,
 } from "lucide-react";
@@ -59,6 +60,44 @@ const SearchFilter = ({
   provincesPromise: Promise<Awaited<ReturnType<typeof fetchListProvince>>>;
 }) => {
   const provinces = React.use(provincesPromise);
+  const today = new Date();
+  const tomorrow = addDays(today, 1);
+
+  const [province, setProvince] = useQueryState(
+    "province",
+    parseAsString.withOptions({ shallow: false }),
+  );
+  const [{ from, to }, setDateRange] = useQueryStates({
+    from: dateRangeParser.withDefault(today).withOptions({ shallow: false }),
+    to: dateRangeParser.withDefault(tomorrow).withOptions({ shallow: false }),
+  });
+  const [room, setRoom] = useQueryState("room", parseAsInteger.withDefault(1));
+  const [promo, setPromo] = useQueryState("promo", parseAsString);
+
+  // Check if any filter has been changed from default
+  const hasActiveFilters = React.useMemo(() => {
+    const isProvinceChanged = province !== null;
+    const isDateChanged =
+      format(from, "yyyy-MM-dd") !== format(today, "yyyy-MM-dd") ||
+      format(to, "yyyy-MM-dd") !== format(tomorrow, "yyyy-MM-dd");
+    const isRoomChanged = room !== 1;
+    const isPromoChanged = promo !== null;
+
+    return (
+      isProvinceChanged || isDateChanged || isRoomChanged || isPromoChanged
+    );
+  }, [province, from, to, room, promo, today, tomorrow]);
+
+  const handleReset = () => {
+    setProvince(null);
+    setDateRange({ from: today, to: tomorrow });
+    setRoom(1);
+    setPromo(null);
+    toast.success("Filters reset", {
+      description: "All search filters have been reset to default values.",
+      duration: 3000,
+    });
+  };
 
   return (
     <section className="mb-0 py-4">
@@ -68,6 +107,16 @@ const SearchFilter = ({
           <DateRangePicker />
           <GuestCounter />
           <PromoButton />
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              className="flex items-center gap-2 bg-gray-200"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span className="hidden sm:inline">Reset</span>
+            </Button>
+          )}
         </div>
       </div>
     </section>
