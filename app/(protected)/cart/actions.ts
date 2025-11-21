@@ -5,6 +5,7 @@ import { ActionResponse } from "@/types";
 import { User } from "@/types/user";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { InvoiceData } from "../history-booking/types";
 import { getContactDetails, saveContactDetails } from "./fetch";
 
 export async function addUserAsGuest(user: User) {
@@ -117,12 +118,12 @@ export async function removeFromCart(
   }
 }
 
-export async function checkoutCart(): Promise<ActionResponse<void>> {
+export async function checkoutCart(): Promise<ActionResponse<InvoiceData[]>> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value || "";
 
   try {
-    const response = await apiCall(`bookings/checkout`, {
+    const response = await apiCall<InvoiceData[]>(`bookings/checkout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -141,6 +142,7 @@ export async function checkoutCart(): Promise<ActionResponse<void>> {
     return {
       success: true,
       message: response.message || "Cart has been successfully checked out",
+      data: response.data,
     };
   } catch (error) {
     console.error("Error removing room from cart:", error);

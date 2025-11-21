@@ -29,22 +29,19 @@ const CartPage = async () => {
           >
             <ContactDetailsSection guests={guests} cart_id={cartData.id} />
           </React.Suspense>
-          {cartData.detail && (
-            <React.Suspense
-              fallback={
-                <Card className="p-6">
-                  <Skeleton className="mb-4 h-8 w-48" />
-                  <div className="space-y-4">
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                  </div>
-                </Card>
-              }
-            >
-              <BookingDetailsSection cartData={cartData} />
-            </React.Suspense>
-          )}
-          {!cartData.detail && <p>No cart available.</p>}
+          <React.Suspense
+            fallback={
+              <Card className="p-6">
+                <Skeleton className="mb-4 h-8 w-48" />
+                <div className="space-y-4">
+                  <Skeleton className="h-32 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              </Card>
+            }
+          >
+            <BookingDetailsSection cartData={cartData} />
+          </React.Suspense>
         </div>
       </div>
     </GuestProvider>

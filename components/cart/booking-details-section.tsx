@@ -6,8 +6,10 @@ import {
   selectGuest,
 } from "@/app/(protected)/cart/actions";
 import { fetchCart } from "@/app/(protected)/cart/fetch";
-import { HistoryBooking } from "@/app/(protected)/history-booking/types";
-import ViewInvoiceDialog from "@/components/history-booking/dialog/view-invoice-dialog";
+import {
+  HistoryBooking,
+  InvoiceData,
+} from "@/app/(protected)/history-booking/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter } from "@/components/ui/card";
 import {
@@ -22,31 +24,53 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Clock, Loader2, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useTransition } from "react";
+import React, { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import ViewInvoiceDialog from "../history-booking/dialog/view-invoice-dialog";
 
 interface BookingDetailsSectionProps {
   cartData: Awaited<ReturnType<typeof fetchCart>>["data"];
 }
 
 const BookingDetailsSection = ({ cartData }: BookingDetailsSectionProps) => {
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [invoices, setInvoices] = useState<InvoiceData[] | null>(null);
+
+  const bookings = useMemo(() => ({ invoices }), [invoices]);
+
+  const handleViewInvoice = (data: InvoiceData[]) => {
+    setInvoices(data);
+    setShowInvoiceDialog(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Booking Details</h2>
       </div>
-      <div className="grid gap-6 sm:gap-8">
-        {cartData?.detail?.map((detail) => (
-          <HotelRoomCard
-            key={detail.id}
-            bookingDetails={detail}
-            guests={cartData.guest}
-          />
-        ))}
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-5">
-          <BookingGrandTotalCard cartData={cartData} />
+      {!cartData.detail && <p>No cart available.</p>}
+      {cartData.detail && (
+        <div className="grid gap-6 sm:gap-8">
+          {cartData?.detail?.map((detail) => (
+            <HotelRoomCard
+              key={detail.id}
+              bookingDetails={detail}
+              guests={cartData.guest}
+            />
+          ))}
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-5">
+            <BookingGrandTotalCard
+              cartData={cartData}
+              handleViewInvoice={handleViewInvoice}
+            />
+          </div>
         </div>
-      </div>
+      )}
+      <ViewInvoiceDialog
+        open={showInvoiceDialog}
+        onOpenChange={setShowInvoiceDialog}
+        booking={bookings as HistoryBooking}
+      />
     </div>
   );
 };
@@ -309,20 +333,22 @@ const HotelRoomCard = ({ bookingDetails, guests }: HotelRoomCardProps) => {
 
 const BookingGrandTotalCard = ({
   cartData,
+  handleViewInvoice,
 }: {
   cartData: Awaited<ReturnType<typeof fetchCart>>["data"];
+  handleViewInvoice: (data: InvoiceData[]) => void;
 }) => {
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
-  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
-  const [generatedBooking, setGeneratedBooking] =
-    useState<HistoryBooking | null>(null);
 
   const onCheckOut = async () => {
     startTransition(async () => {
       toast.promise(checkoutCart(), {
         loading: "Checking out cart...",
-        success: ({ message }) => {
+        success: ({ data, message }) => {
+          if (data) {
+            handleViewInvoice(data);
+          }
           queryClient.invalidateQueries({ queryKey: ["cart"] });
           return message || "Cart checked out successfully!";
         },
@@ -395,13 +421,6 @@ const BookingGrandTotalCard = ({
           )}
         </Button>
       </div>
-
-      {/* Invoice Dialog */}
-      <ViewInvoiceDialog
-        open={showInvoiceDialog}
-        onOpenChange={setShowInvoiceDialog}
-        booking={generatedBooking}
-      />
     </div>
   );
 };

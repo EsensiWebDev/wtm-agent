@@ -90,8 +90,12 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
   const [uploadReceiptOpen, setUploadReceiptOpen] = useState(false);
   const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
 
-  const allInvoiceData = booking?.invoices || [];
-  const invoice = booking?.invoices[currentInvoiceIndex];
+  if (!booking) {
+    return null;
+  }
+
+  const allInvoiceData = booking.invoices || [];
+  const invoice = allInvoiceData[currentInvoiceIndex];
 
   const newInvoiceData = {
     invoiceNumber: invoice?.invoice_number || "Invoice Number Not Found",
