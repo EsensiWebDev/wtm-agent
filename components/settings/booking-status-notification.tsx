@@ -3,277 +3,207 @@
 import { updateNotificationSetting } from "@/app/(protected)/settings/actions";
 import { AccountProfile } from "@/app/(protected)/settings/types";
 import NotificationSection from "@/components/settings/notification-section";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface BookingStatusNotificationProps {
   defaultValues: AccountProfile;
 }
 
+type NotificationType = "booking" | "reject";
+
+interface ChannelState {
+  enabled: boolean;
+  booking: boolean;
+  reject: boolean;
+  allChecked: boolean;
+}
+
+// Helper function to initialize channel state from settings
+const initializeChannelState = (
+  settings: Array<{ channel: string; is_enable: boolean; type: string }>,
+  channel: string,
+): ChannelState => {
+  const channelSettings = settings.filter((s) => s.channel === channel);
+  const allSetting = channelSettings.find((s) => s.type === "all");
+  const isAllEnabled = allSetting?.is_enable || false;
+
+  const booking =
+    channelSettings.find((s) => s.type === "booking")?.is_enable ||
+    isAllEnabled;
+  const reject =
+    channelSettings.find((s) => s.type === "reject")?.is_enable || isAllEnabled;
+
+  return {
+    enabled: channelSettings.some((s) => s.is_enable),
+    booking,
+    reject,
+    allChecked: booking && reject,
+  };
+};
+
 const BookingStatusNotification = ({
   defaultValues,
 }: BookingStatusNotificationProps) => {
   const [isPending, startTransition] = useTransition();
-  // Get email notification settings
-  const emailNotifications =
-    defaultValues.notification_settings?.filter(
-      (setting) => setting.channel === "email",
-    ) || [];
 
-  // Check if email has "all" type enabled
-  const emailAllSetting = emailNotifications.find((n) => n.type === "all");
-  const isEmailAllEnabled = emailAllSetting?.is_enable || false;
-
-  // Initialize state for email notifications
-  const [emailEnabled, setEmailEnabled] = useState<boolean>(
-    emailNotifications.some((n) => n.is_enable),
+  // Initialize states for both channels
+  const [emailState, setEmailState] = useState<ChannelState>(() =>
+    initializeChannelState(defaultValues.notification_settings || [], "email"),
   );
 
-  const [confirmedBooking, setConfirmedBooking] = useState<boolean>(
-    emailNotifications.find((n) => n.type === "booking")?.is_enable ||
-      isEmailAllEnabled,
+  const [webState, setWebState] = useState<ChannelState>(() =>
+    initializeChannelState(defaultValues.notification_settings || [], "web"),
   );
 
-  const [rejectedBooking, setRejectedBooking] = useState<boolean>(
-    emailNotifications.find((n) => n.type === "reject")?.is_enable ||
-      isEmailAllEnabled,
-  );
-
-  // Get web app notification settings
-  const webNotifications =
-    defaultValues.notification_settings?.filter(
-      (setting) => setting.channel === "web",
-    ) || [];
-
-  // Check if web has "all" type enabled
-  const webAllSetting = webNotifications.find((n) => n.type === "all");
-  const isWebAllEnabled = webAllSetting?.is_enable || false;
-
-  const [webAppEnabled, setWebAppEnabled] = useState<boolean>(
-    webNotifications.some((n) => n.is_enable),
-  );
-
-  const [webConfirmedBooking, setWebConfirmedBooking] = useState<boolean>(
-    webNotifications.find((n) => n.type === "booking")?.is_enable ||
-      isWebAllEnabled,
-  );
-
-  const [webRejectedBooking, setWebRejectedBooking] = useState<boolean>(
-    webNotifications.find((n) => n.type === "reject")?.is_enable ||
-      isWebAllEnabled,
-  );
-
-  // Handle "All" checkbox for email notifications
-  const [allEmailChecked, setAllEmailChecked] = useState<boolean>(
-    isEmailAllEnabled || (confirmedBooking && rejectedBooking),
-  );
-
-  // Handle "All" checkbox for web app notifications
-  const [allWebChecked, setAllWebChecked] = useState<boolean>(
-    isWebAllEnabled || (webConfirmedBooking && webRejectedBooking),
-  );
+  // Sync "All" checkbox with individual options
+  useEffect(() => {
+    setEmailState((prev) => ({
+      ...prev,
+      allChecked: prev.booking && prev.reject,
+      enabled: prev.booking || prev.reject ? prev.enabled : false,
+    }));
+  }, [emailState.booking, emailState.reject]);
 
   useEffect(() => {
-    setAllEmailChecked(confirmedBooking && rejectedBooking);
-    // Sync main switch with individual checkboxes - turn off if all are unchecked
-    if (!confirmedBooking && !rejectedBooking) {
-      setEmailEnabled(false);
-    }
-  }, [confirmedBooking, rejectedBooking]);
+    setWebState((prev) => ({
+      ...prev,
+      allChecked: prev.booking && prev.reject,
+      enabled: prev.booking || prev.reject ? prev.enabled : false,
+    }));
+  }, [webState.booking, webState.reject]);
 
-  useEffect(() => {
-    setAllWebChecked(webConfirmedBooking && webRejectedBooking);
-    // Sync main switch with individual checkboxes - turn off if all are unchecked
-    if (!webConfirmedBooking && !webRejectedBooking) {
-      setWebAppEnabled(false);
-    }
-  }, [webConfirmedBooking, webRejectedBooking]);
+  // Unified notification update handler
+  const updateNotification = useCallback(
+    async (channel: string, type: string, isEnable: boolean) => {
+      startTransition(async () => {
+        try {
+          const result = await updateNotificationSetting({
+            channel,
+            type,
+            isEnable,
+          });
 
-  // Helper function to update notification setting
-  const handleUpdateNotification = async (
-    channel: string,
-    type: string,
-    isEnable: boolean,
-  ) => {
-    startTransition(async () => {
-      try {
-        const result = await updateNotificationSetting({
-          channel,
-          type,
-          isEnable,
-        });
-
-        if (!result.success) {
-          toast.error(
-            result.message || "Failed to update notification setting",
-          );
-        } else {
-          toast.success(
-            result.message || "Notification setting updated successfully",
-          );
+          if (!result.success) {
+            toast.error(
+              result.message || "Failed to update notification setting",
+            );
+          } else {
+            toast.success(
+              result.message || "Notification setting updated successfully",
+            );
+          }
+        } catch (error) {
+          toast.error("An error occurred while updating notification setting");
+          console.error("Error updating notification:", error);
         }
-      } catch (error) {
-        toast.error("An error occurred while updating notification setting");
-        console.error("Error updating notification:", error);
-      }
-    });
-  };
+      });
+    },
+    [startTransition],
+  );
 
-  // Email notification handlers
-  const handleEmailEnabledChange = (enabled: boolean) => {
-    setEmailEnabled(enabled);
+  // Generic handler factory for notification types
+  const createNotificationHandler = useCallback(
+    (
+      channel: string,
+      notificationType: NotificationType,
+      setState: React.Dispatch<React.SetStateAction<ChannelState>>,
+      otherType: NotificationType,
+    ) => {
+      return (checked: boolean) => {
+        setState((prev) => ({ ...prev, [notificationType]: checked }));
 
-    if (enabled) {
-      // When turning on main switch, check all individual options
-      setConfirmedBooking(true);
-      setRejectedBooking(true);
-      setAllEmailChecked(true);
-    }
+        // Determine the appropriate update based on current state
+        const otherChecked =
+          setState === setEmailState
+            ? notificationType === "booking"
+              ? emailState.reject
+              : emailState.booking
+            : notificationType === "booking"
+              ? webState.reject
+              : webState.booking;
 
-    // When toggling the main switch, update the "all" type
-    handleUpdateNotification("email", "all", enabled);
-  };
+        if (!checked) {
+          // Unchecking: send individual update for remaining item or disable all
+          if (otherChecked) {
+            updateNotification(channel, otherType, true);
+          } else {
+            updateNotification(channel, "all", false);
+          }
+        } else {
+          // Checking: send "all" if both are enabled, otherwise individual
+          if (otherChecked) {
+            updateNotification(channel, "all", true);
+          } else {
+            updateNotification(channel, notificationType, true);
+          }
+        }
+      };
+    },
+    [emailState, webState, updateNotification],
+  );
 
-  const handleConfirmedBookingChange = (checked: boolean) => {
-    setConfirmedBooking(checked);
+  // Channel-level handlers
+  const handleChannelToggle = useCallback(
+    (
+      channel: string,
+      enabled: boolean,
+      setState: React.Dispatch<React.SetStateAction<ChannelState>>,
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        enabled,
+        booking: enabled ? true : prev.booking,
+        reject: enabled ? true : prev.reject,
+        allChecked: enabled ? true : prev.allChecked,
+      }));
 
-    if (!checked) {
-      // When unchecking, check if there are any remaining checked items
-      if (rejectedBooking) {
-        // Send update for the remaining checked item
-        handleUpdateNotification("email", "reject", true);
-      } else {
-        // No items remain checked, disable the entire channel
-        handleUpdateNotification("email", "all", false);
-      }
-    } else {
-      // When checking, check if all notifications will be enabled
-      if (rejectedBooking) {
-        // Both will be checked, send "all" update
-        handleUpdateNotification("email", "all", true);
-      } else {
-        // Only this one is checked, send individual update
-        handleUpdateNotification("email", "booking", true);
-      }
-    }
-  };
+      updateNotification(channel, "all", enabled);
+    },
+    [updateNotification],
+  );
 
-  const handleRejectedBookingChange = (checked: boolean) => {
-    setRejectedBooking(checked);
+  const handleAllToggle = useCallback(
+    (
+      channel: string,
+      checked: boolean,
+      setState: React.Dispatch<React.SetStateAction<ChannelState>>,
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        booking: checked,
+        reject: checked,
+        allChecked: checked,
+      }));
 
-    if (!checked) {
-      // When unchecking, check if there are any remaining checked items
-      if (confirmedBooking) {
-        // Send update for the remaining checked item
-        handleUpdateNotification("email", "booking", true);
-      } else {
-        // No items remain checked, disable the entire channel
-        handleUpdateNotification("email", "all", false);
-      }
-    } else {
-      // When checking, check if all notifications will be enabled
-      if (confirmedBooking) {
-        // Both will be checked, send "all" update
-        handleUpdateNotification("email", "all", true);
-      } else {
-        // Only this one is checked, send individual update
-        handleUpdateNotification("email", "reject", true);
-      }
-    }
-  };
-
-  const handleAllEmailChange = (checked: boolean) => {
-    setAllEmailChecked(checked);
-    setConfirmedBooking(checked);
-    setRejectedBooking(checked);
-    // When toggling "All" checkbox, update the "all" type
-    handleUpdateNotification("email", "all", checked);
-  };
-
-  // Web app notification handlers
-  const handleWebAppEnabledChange = (enabled: boolean) => {
-    setWebAppEnabled(enabled);
-
-    if (enabled) {
-      // When turning on main switch, check all individual options
-      setWebConfirmedBooking(true);
-      setWebRejectedBooking(true);
-      setAllWebChecked(true);
-    }
-
-    // When toggling the main switch, update the "all" type
-    handleUpdateNotification("web", "all", enabled);
-  };
-
-  const handleWebConfirmedBookingChange = (checked: boolean) => {
-    setWebConfirmedBooking(checked);
-
-    if (!checked) {
-      // When unchecking, check if there are any remaining checked items
-      if (webRejectedBooking) {
-        // Send update for the remaining checked item
-        handleUpdateNotification("web", "reject", true);
-      } else {
-        // No items remain checked, disable the entire channel
-        handleUpdateNotification("web", "all", false);
-      }
-    } else {
-      // When checking, check if all notifications will be enabled
-      if (webRejectedBooking) {
-        // Both will be checked, send "all" update
-        handleUpdateNotification("web", "all", true);
-      } else {
-        // Only this one is checked, send individual update
-        handleUpdateNotification("web", "booking", true);
-      }
-    }
-  };
-
-  const handleWebRejectedBookingChange = (checked: boolean) => {
-    setWebRejectedBooking(checked);
-
-    if (!checked) {
-      // When unchecking, check if there are any remaining checked items
-      if (webConfirmedBooking) {
-        // Send update for the remaining checked item
-        handleUpdateNotification("web", "booking", true);
-      } else {
-        // No items remain checked, disable the entire channel
-        handleUpdateNotification("web", "all", false);
-      }
-    } else {
-      // When checking, check if all notifications will be enabled
-      if (webConfirmedBooking) {
-        // Both will be checked, send "all" update
-        handleUpdateNotification("web", "all", true);
-      } else {
-        // Only this one is checked, send individual update
-        handleUpdateNotification("web", "reject", true);
-      }
-    }
-  };
-
-  const handleAllWebChange = (checked: boolean) => {
-    setAllWebChecked(checked);
-    setWebConfirmedBooking(checked);
-    setWebRejectedBooking(checked);
-    // When toggling "All" checkbox, update the "all" type
-    handleUpdateNotification("web", "all", checked);
-  };
+      updateNotification(channel, "all", checked);
+    },
+    [updateNotification],
+  );
 
   // Email notification options
   const emailOptions = [
     {
       id: "confirmed-booking",
       label: "Confirmed Booking",
-      checked: confirmedBooking,
-      onCheckedChange: handleConfirmedBookingChange,
+      checked: emailState.booking,
+      onCheckedChange: createNotificationHandler(
+        "email",
+        "booking",
+        setEmailState,
+        "reject",
+      ),
     },
     {
       id: "rejected-booking",
       label: "Rejected Booking",
-      checked: rejectedBooking,
-      onCheckedChange: handleRejectedBookingChange,
+      checked: emailState.reject,
+      onCheckedChange: createNotificationHandler(
+        "email",
+        "reject",
+        setEmailState,
+        "booking",
+      ),
     },
   ];
 
@@ -282,14 +212,24 @@ const BookingStatusNotification = ({
     {
       id: "web-confirmed-booking",
       label: "Confirmed Booking",
-      checked: webConfirmedBooking,
-      onCheckedChange: handleWebConfirmedBookingChange,
+      checked: webState.booking,
+      onCheckedChange: createNotificationHandler(
+        "web",
+        "booking",
+        setWebState,
+        "reject",
+      ),
     },
     {
       id: "web-rejected-booking",
       label: "Rejected Booking",
-      checked: webRejectedBooking,
-      onCheckedChange: handleWebRejectedBookingChange,
+      checked: webState.reject,
+      onCheckedChange: createNotificationHandler(
+        "web",
+        "reject",
+        setWebState,
+        "booking",
+      ),
     },
   ];
 
@@ -298,23 +238,31 @@ const BookingStatusNotification = ({
       {/* Email Notifications */}
       <NotificationSection
         title="Email Notifications"
-        enabled={emailEnabled}
-        onEnabledChange={handleEmailEnabledChange}
+        enabled={emailState.enabled}
+        onEnabledChange={(enabled) =>
+          handleChannelToggle("email", enabled, setEmailState)
+        }
         options={emailOptions}
         showAllCheckbox
-        allChecked={allEmailChecked}
-        onAllCheckedChange={handleAllEmailChange}
+        allChecked={emailState.allChecked}
+        onAllCheckedChange={(checked) =>
+          handleAllToggle("email", checked, setEmailState)
+        }
       />
 
       {/* Web App Notifications */}
       <NotificationSection
         title="Web App Notifications"
-        enabled={webAppEnabled}
-        onEnabledChange={handleWebAppEnabledChange}
+        enabled={webState.enabled}
+        onEnabledChange={(enabled) =>
+          handleChannelToggle("web", enabled, setWebState)
+        }
         options={webOptions}
         showAllCheckbox
-        allChecked={allWebChecked}
-        onAllCheckedChange={handleAllWebChange}
+        allChecked={webState.allChecked}
+        onAllCheckedChange={(checked) =>
+          handleAllToggle("web", checked, setWebState)
+        }
       />
     </div>
   );
