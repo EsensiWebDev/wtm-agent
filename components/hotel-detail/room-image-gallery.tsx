@@ -62,7 +62,7 @@ export function RoomImageGallery({
   }
 
   return (
-    <div className="col-span-2 flex flex-col gap-2">
+    <div className="col-span-1 flex flex-col gap-2 lg:col-span-2">
       {/* Main image */}
       <div
         className="group relative col-span-3 aspect-[4/3] cursor-pointer overflow-hidden rounded-lg"
@@ -102,7 +102,7 @@ export function RoomImageGallery({
 // Fallback view when no images are available
 function ImageFallbackView({ onImageClick }: { onImageClick: () => void }) {
   return (
-    <div className="col-span-2 flex flex-col gap-2">
+    <div className="col-span-1 flex flex-col gap-2 lg:col-span-2">
       {/* Main fallback image */}
       <div
         className="group relative col-span-3 aspect-[4/3] cursor-pointer overflow-hidden rounded-lg bg-gray-100"

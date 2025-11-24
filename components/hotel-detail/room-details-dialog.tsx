@@ -130,16 +130,16 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] min-w-7xl overflow-y-auto bg-white px-8">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto bg-white px-4 sm:max-w-7xl sm:px-8">
         <DialogHeader>
-          <DialogTitle className="text-left text-2xl font-bold">
+          <DialogTitle className="text-left text-lg font-bold sm:text-2xl">
             {room.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-2">
           {/* Main Image Carousel */}
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             <div className="relative">
               {hasPhotos ? (
                 <Carousel setApi={setMainApi} className="w-full">
@@ -160,8 +160,8 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
                   </CarouselContent>
                   {room.photos.length > 1 && (
                     <>
-                      <CarouselPrevious className="left-2 h-8 w-8 bg-white/90 shadow-md hover:bg-white" />
-                      <CarouselNext className="right-2 h-8 w-8 bg-white/90 shadow-md hover:bg-white" />
+                      <CarouselPrevious className="left-1 h-7 w-7 bg-white/90 shadow-md hover:bg-white sm:left-2 sm:h-8 sm:w-8" />
+                      <CarouselNext className="right-1 h-7 w-7 bg-white/90 shadow-md hover:bg-white sm:right-2 sm:h-8 sm:w-8" />
                     </>
                   )}
                 </Carousel>
@@ -177,7 +177,7 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
               )}
 
               {hasPhotos && count > 1 && (
-                <div className="absolute right-2 bottom-2 rounded bg-black/50 px-2 py-1 text-sm text-white">
+                <div className="absolute right-1 bottom-1 rounded bg-black/50 px-1.5 py-0.5 text-xs text-white sm:right-2 sm:bottom-2 sm:px-2 sm:py-1 sm:text-sm">
                   {current} / {count}
                 </div>
               )}
@@ -185,23 +185,32 @@ const RoomDetailsDialog: React.FC<RoomDetailsDialogProps> = ({
           </div>
 
           {/* Room Information Section */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h3 className="mb-4 text-lg font-semibold">Room Information</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <h3 className="mb-3 text-base font-semibold sm:mb-4 sm:text-lg">
+                Room Information
+              </h3>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
                 {features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    {getIcon(feature.icon)}
-                    <span className="text-sm capitalize">{feature.text}</span>
+                  <div
+                    key={index}
+                    className="flex items-center gap-1.5 sm:gap-2"
+                  >
+                    <div className="flex-shrink-0">{getIcon(feature.icon)}</div>
+                    <span className="text-xs capitalize sm:text-sm">
+                      {feature.text}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-semibold">About This Room</h3>
-              <div className="space-y-3">
-                <p className="text-sm leading-relaxed text-gray-700">
+              <h3 className="mb-3 text-base font-semibold sm:mb-4 sm:text-lg">
+                About This Room
+              </h3>
+              <div className="space-y-2 sm:space-y-3">
+                <p className="text-xs leading-relaxed text-gray-700 sm:text-sm">
                   {room.description}
                 </p>
               </div>

@@ -39,14 +39,14 @@ function RoomOptionItem({
 
   return (
     <div
-      className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50 ${
+      className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50 sm:p-4 ${
         isSelected
           ? "border-primary bg-primary/5"
           : "border-gray-200 hover:bg-gray-50"
       }`}
       onClick={onChange}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <input
           type="radio"
           id={`option-${radioGroupName}-${option.id}`}
@@ -58,23 +58,25 @@ function RoomOptionItem({
         <div className="cursor-pointer">
           <label
             htmlFor={`option-${radioGroupName}-${option.id}`}
-            className="cursor-pointer font-medium text-gray-900"
+            className="cursor-pointer text-sm font-medium text-gray-900 sm:text-base"
           >
             {label}
           </label>
           {!!option.pax && (
-            <p className="text-sm text-gray-600">for {option.pax} pax</p>
+            <p className="text-xs text-gray-600 sm:text-sm">
+              for {option.pax} pax
+            </p>
           )}
         </div>
       </div>
 
       <div className="text-right">
         {showOriginalPrice && (
-          <p className="text-sm text-gray-500 line-through">
+          <p className="text-xs text-gray-500 line-through sm:text-sm">
             <span>Rp {option.price.toLocaleString("id-ID")}</span>
           </p>
         )}
-        <p className="text-lg font-semibold text-gray-900">
+        <p className="text-base font-semibold text-gray-900 sm:text-lg">
           <span>Rp {currentPrice.toLocaleString("id-ID")}</span>
         </p>
       </div>
@@ -101,8 +103,10 @@ export function RoomOptions({
 }: RoomOptionsProps) {
   return (
     <div>
-      <h3 className="mb-4 text-lg font-semibold text-gray-900">Room Options</h3>
-      <div className="space-y-4">
+      <h3 className="mb-3 text-base font-semibold text-gray-900 sm:mb-4 sm:text-lg">
+        Room Options
+      </h3>
+      <div className="space-y-3 sm:space-y-4">
         {without_breakfast && without_breakfast.is_show && (
           <RoomOptionItem
             option={without_breakfast}

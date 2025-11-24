@@ -112,18 +112,18 @@ export default function RoomCard({ room }: { room: RoomType }) {
 
   return (
     <Card className="overflow-hidden rounded-lg bg-white shadow-sm">
-      <div className="p-6">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+      <div className="p-4 sm:p-6">
+        <h2 className="mb-4 text-xl font-semibold text-gray-900 sm:mb-6 sm:text-2xl">
           {room.name}
         </h2>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-5">
           <RoomImageGallery
             images={roomImages}
             onImageClick={() => setIsDialogOpen(true)}
           />
 
-          <div className="col-span-3 flex flex-col">
+          <div className="col-span-1 flex flex-col lg:col-span-3">
             <RoomOptions
               with_breakfast={room.with_breakfast}
               without_breakfast={room.without_breakfast}
@@ -151,7 +151,7 @@ export default function RoomCard({ room }: { room: RoomType }) {
 
             <RoomFeatures features={features} />
 
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <button
                 onClick={() => setIsDialogOpen(true)}
                 className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
@@ -161,7 +161,7 @@ export default function RoomCard({ room }: { room: RoomType }) {
               </button>
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-4 flex flex-col space-y-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium">Room</span>
                 <div className="flex items-center space-x-2">
@@ -192,7 +192,7 @@ export default function RoomCard({ room }: { room: RoomType }) {
               <Button
                 onClick={handleAddToCart}
                 disabled={isPending || selectedRoom === 0}
-                className="px-8 py-2 text-white hover:bg-slate-700 disabled:opacity-50"
+                className="w-full px-8 py-2 text-white hover:bg-slate-700 disabled:opacity-50 sm:w-auto"
               >
                 {isPending && <Spinner />}
                 {isPending ? "Adding..." : "Add to Cart"}

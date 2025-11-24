@@ -20,12 +20,16 @@ function HotelDescription({ description }: { description: string }) {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold">Description</h2>
-      <p className="text-muted-foreground mb-4 text-sm">{displayText}</p>
+      <h2 className="mb-3 text-base font-bold sm:mb-4 sm:text-lg">
+        Description
+      </h2>
+      <p className="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
+        {displayText}
+      </p>
       {shouldTruncate && (
         <Button
           variant={"ghost"}
-          className="flex items-center text-sm font-medium"
+          className="flex items-center text-xs font-medium sm:text-sm"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? "Show Less" : "Read More"}{" "}
@@ -47,12 +51,14 @@ function HotelNearUs({ locations }: { locations: NearbyPlace[] }) {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold">Near Us</h2>
-      <div className="space-y-3">
+      <h2 className="mb-3 text-base font-bold sm:mb-4 sm:text-lg">Near Us</h2>
+      <div className="space-y-2 sm:space-y-3">
         {displayLocations.map((location, index) => (
           <div key={index} className="flex w-full items-center">
-            <MapPin size={16} className="mr-2" />
-            <span className="text-sm font-medium">{location.name}</span>
+            <MapPin size={14} className="mr-2 sm:mr-2" />
+            <span className="text-xs font-medium sm:text-sm">
+              {location.name}
+            </span>
             <span className="text-muted-foreground ml-auto text-xs">
               {location.radius}m
             </span>
@@ -62,7 +68,7 @@ function HotelNearUs({ locations }: { locations: NearbyPlace[] }) {
       {shouldTruncate && (
         <Button
           variant={"ghost"}
-          className="mt-4 flex items-center text-sm font-medium"
+          className="mt-3 flex items-center text-xs font-medium sm:mt-4 sm:text-sm"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? "Show Less" : "Read More"}{" "}
@@ -84,8 +90,10 @@ function HotelFacilities({ facilities }: { facilities: string[] }) {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-bold">Main Facilities</h2>
-      <ul className="text-muted-foreground mb-4 list-disc space-y-2 pl-5 text-sm">
+      <h2 className="mb-3 text-base font-bold sm:mb-4 sm:text-lg">
+        Main Facilities
+      </h2>
+      <ul className="text-muted-foreground mb-3 list-disc space-y-1 pl-5 text-xs sm:mb-4 sm:space-y-2 sm:text-sm">
         {displayFacilities.map((facility, index) => (
           <li key={index}>{facility}</li>
         ))}
@@ -93,7 +101,7 @@ function HotelFacilities({ facilities }: { facilities: string[] }) {
       {shouldTruncate && (
         <Button
           variant={"ghost"}
-          className="flex items-center text-sm font-medium"
+          className="flex items-center text-xs font-medium sm:text-sm"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {isExpanded ? "Show Less" : "Read More"}{" "}
@@ -123,25 +131,27 @@ export function HotelInfo({
 }) {
   return (
     <>
-      <div className="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-10 sm:grid-cols-3 sm:gap-8">
         <div className="flex flex-col gap-1">
           <span className="text-yellow-500">{generateStars(rating)}</span>
-          <h1 className="text-2xl font-bold">{name}</h1>
-          <p className="text-xsm text-muted-foreground">{location}</p>
+          <h1 className="text-xl font-bold sm:text-2xl">{name}</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">{location}</p>
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="hidden flex-col gap-1 sm:flex">
           <br />
         </div>
-        <div className="flex flex-col items-end justify-end gap-1">
-          <p className="text-muted-foreground text-sm">Start from</p>
-          <p className="text-xl font-bold">
+        <div className="flex flex-col items-start gap-1 sm:items-end sm:justify-end">
+          <p className="text-muted-foreground text-xs sm:text-sm">Start from</p>
+          <p className="text-lg font-bold sm:text-xl">
             Rp {price.toLocaleString("id-ID")}
           </p>
-          <p className="text-muted-foreground text-sm">per room, per night</p>
+          <p className="text-muted-foreground text-xs sm:text-sm">
+            per room, per night
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-8">
         <HotelDescription description={description} />
         <HotelNearUs locations={nearby} />
         <HotelFacilities facilities={facilities} />

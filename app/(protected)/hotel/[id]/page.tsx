@@ -13,7 +13,7 @@ export default async function HotelDetailPage({
   const { data: hotel } = await fetchHotelDetail({ hotel_id: id });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Gallery Section */}
       <section>
         <HotelGallery images={hotel.photos || []} />

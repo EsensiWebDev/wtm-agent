@@ -54,16 +54,16 @@ export function HotelGallery({
 }) {
   if (!images.length) {
     return (
-      <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-4 sm:grid-rows-2 sm:gap-x-6 lg:gap-6">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:gap-x-6 lg:gap-6">
         <div className="flex items-center justify-center rounded bg-gray-100 sm:col-span-2 sm:row-span-2 sm:aspect-square">
-          <span className="text-gray-500">
+          <span className="text-sm text-gray-500 sm:text-base">
             No images available for this hotel
           </span>
         </div>
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="flex items-center justify-center rounded bg-gray-100 sm:aspect-auto"
+            className="hidden items-center justify-center rounded bg-gray-100 sm:flex sm:aspect-auto"
           >
             <span className="text-gray-500">
               No images available for this hotel
@@ -82,7 +82,7 @@ export function HotelGallery({
   const moreImage = images[showCount - 1];
 
   return (
-    <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-4 sm:grid-rows-2 sm:gap-x-6 lg:gap-6">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:gap-x-6 lg:gap-6">
       {/* Main image */}
       <ImageItem
         src={mainImage}
@@ -91,14 +91,18 @@ export function HotelGallery({
 
       {/* Gallery images */}
       {galleryImages.map((src, i) => (
-        <ImageItem key={src + i} src={src} className="sm:aspect-auto" />
+        <ImageItem
+          key={src + i}
+          src={src}
+          className="hidden sm:block sm:aspect-auto"
+        />
       ))}
 
       {/* More images overlay */}
       {hiddenCount > 0 && (
         <ImageItem
           src={moreImage}
-          className="sm:aspect-auto"
+          className="hidden sm:block sm:aspect-auto"
           overlay={
             <>
               <div
@@ -106,7 +110,9 @@ export function HotelGallery({
                 aria-hidden
               />
               <div className="absolute inset-0 flex items-center justify-center p-6">
-                <span className="text-5xl text-white">+{hiddenCount}</span>
+                <span className="text-3xl text-white sm:text-5xl">
+                  +{hiddenCount}
+                </span>
               </div>
             </>
           }
