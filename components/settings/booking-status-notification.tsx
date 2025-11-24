@@ -35,7 +35,7 @@ const BookingStatusNotification = ({
   );
 
   const [rejectedBooking, setRejectedBooking] = useState<boolean>(
-    emailNotifications.find((n) => n.type === "rejected")?.is_enable ||
+    emailNotifications.find((n) => n.type === "reject")?.is_enable ||
       isEmailAllEnabled,
   );
 
@@ -59,7 +59,7 @@ const BookingStatusNotification = ({
   );
 
   const [webRejectedBooking, setWebRejectedBooking] = useState<boolean>(
-    webNotifications.find((n) => n.type === "rejected")?.is_enable ||
+    webNotifications.find((n) => n.type === "reject")?.is_enable ||
       isWebAllEnabled,
   );
 
@@ -141,14 +141,20 @@ const BookingStatusNotification = ({
       // When unchecking, check if there are any remaining checked items
       if (rejectedBooking) {
         // Send update for the remaining checked item
-        handleUpdateNotification("email", "rejected", true);
+        handleUpdateNotification("email", "reject", true);
       } else {
         // No items remain checked, disable the entire channel
         handleUpdateNotification("email", "all", false);
       }
     } else {
-      // When checking, send update for this specific notification type
-      handleUpdateNotification("email", "booking", true);
+      // When checking, check if all notifications will be enabled
+      if (rejectedBooking) {
+        // Both will be checked, send "all" update
+        handleUpdateNotification("email", "all", true);
+      } else {
+        // Only this one is checked, send individual update
+        handleUpdateNotification("email", "booking", true);
+      }
     }
   };
 
@@ -165,8 +171,14 @@ const BookingStatusNotification = ({
         handleUpdateNotification("email", "all", false);
       }
     } else {
-      // When checking, send update for this specific notification type
-      handleUpdateNotification("email", "rejected", true);
+      // When checking, check if all notifications will be enabled
+      if (confirmedBooking) {
+        // Both will be checked, send "all" update
+        handleUpdateNotification("email", "all", true);
+      } else {
+        // Only this one is checked, send individual update
+        handleUpdateNotification("email", "reject", true);
+      }
     }
   };
 
@@ -200,14 +212,20 @@ const BookingStatusNotification = ({
       // When unchecking, check if there are any remaining checked items
       if (webRejectedBooking) {
         // Send update for the remaining checked item
-        handleUpdateNotification("web", "rejected", true);
+        handleUpdateNotification("web", "reject", true);
       } else {
         // No items remain checked, disable the entire channel
         handleUpdateNotification("web", "all", false);
       }
     } else {
-      // When checking, send update for this specific notification type
-      handleUpdateNotification("web", "booking", true);
+      // When checking, check if all notifications will be enabled
+      if (webRejectedBooking) {
+        // Both will be checked, send "all" update
+        handleUpdateNotification("web", "all", true);
+      } else {
+        // Only this one is checked, send individual update
+        handleUpdateNotification("web", "booking", true);
+      }
     }
   };
 
@@ -224,8 +242,14 @@ const BookingStatusNotification = ({
         handleUpdateNotification("web", "all", false);
       }
     } else {
-      // When checking, send update for this specific notification type
-      handleUpdateNotification("web", "rejected", true);
+      // When checking, check if all notifications will be enabled
+      if (webConfirmedBooking) {
+        // Both will be checked, send "all" update
+        handleUpdateNotification("web", "all", true);
+      } else {
+        // Only this one is checked, send individual update
+        handleUpdateNotification("web", "reject", true);
+      }
     }
   };
 
