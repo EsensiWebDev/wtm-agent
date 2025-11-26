@@ -13,6 +13,7 @@ export type Cart = {
       hotel_name: string;
       hotel_rating: number;
       id: number;
+      photo?: string;
       is_breakfast: true;
       price: number;
       promo: {
@@ -26,6 +27,7 @@ export type Cart = {
       room_type_name: string;
       total_additional_price: number;
       total_price: number;
+      cancellation_date?: string;
     },
   ];
   grand_total: number;

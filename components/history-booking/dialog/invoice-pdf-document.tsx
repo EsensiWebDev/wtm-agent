@@ -354,7 +354,7 @@ export const InvoicePDFDocument: React.FC<{
               color: "#111827",
             }}
           >
-            PT. World Travel Marketing Bali test
+            PT. World Travel Marketing Bali
           </Text>
           <Text style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.4 }}>
             Ikat Plaza Building - Jl. Bypass Ngurah Rai No. 505{"\n"}

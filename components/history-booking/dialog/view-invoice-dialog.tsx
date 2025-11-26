@@ -238,7 +238,7 @@ const ViewInvoiceDialog: React.FC<ViewInvoiceDialogProps> = ({
           <div className="flex items-start justify-between pb-6">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-gray-900">
-                PT. World Travel Marketing Bali test
+                PT. World Travel Marketing Bali
               </h2>
               <p className="text-sm text-gray-600">
                 Ikat Plaza Building - Jl. Bypass Ngurah Rai No. 505

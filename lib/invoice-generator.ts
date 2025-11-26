@@ -10,7 +10,7 @@ import {
 export class InvoiceGenerator {
   // Company information (from the image)
   private static readonly COMPANY_INFO: InvoiceCompany = {
-    name: "PT. World Travel Marketing Bali test",
+    name: "PT. World Travel Marketing Bali",
     address:
       "Ikat Plaza Building - Jl. Bypass Ngurah Rai No. 505\nPemogan - Denpasar Selatan\n80221 Denpasar - Bali - Indonesia",
     phone: "0361 4756583",

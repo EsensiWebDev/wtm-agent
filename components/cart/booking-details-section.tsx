@@ -27,6 +27,7 @@ import Image from "next/image";
 import React, { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import ViewInvoiceDialog from "../history-booking/dialog/view-invoice-dialog";
+import { formatUrl } from "@/lib/url-utils";
 
 interface BookingDetailsSectionProps {
   cartData: Awaited<ReturnType<typeof fetchCart>>["data"];
@@ -87,6 +88,10 @@ const HotelRoomCard = ({ bookingDetails, guests }: HotelRoomCardProps) => {
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [isSelecting, startSelectTransition] = useTransition();
+  const [imageError, setImageError] = useState(false);
+
+  // Determine if we should show placeholder
+  const shouldShowPlaceholder = !bookingDetails.photo || imageError;
 
   // Sample coupon data - in real app this would come from props or API
   const couponDiscount = {
@@ -160,20 +165,46 @@ const HotelRoomCard = ({ bookingDetails, guests }: HotelRoomCardProps) => {
             </h3>
           </div>
           <div className="relative aspect-[3/1] overflow-hidden rounded-b-xl">
-            <Image
-              src={"/hotel-detail/WTM Prototype.png"}
-              // src={bookingDetails.imageSrc}
-              alt={bookingDetails.hotel_name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+            {shouldShowPlaceholder ? (
+              <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-800">
+                <div className="text-center">
+                  <svg
+                    className="mx-auto h-16 w-16 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Image not found
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <Image
+                src={formatUrl(bookingDetails.photo!) || ""}
+                alt={bookingDetails.hotel_name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
         </Card>
         <div className="mt-4 flex flex-1 justify-end bg-transparent text-sm text-red-500">
-          Cancelation Period until{" "}
-          {/* {format(bookingDetails.cancellationPeriod, "dd MMM yyyy")} */}
-          {format(new Date(), "dd MMM yyyy")}
+          {bookingDetails.cancellation_date && (
+            <>
+              Cancelation Period until{" "}
+              {format(bookingDetails.cancellation_date, "dd MMM yyyy")}
+            </>
+          )}
         </div>
       </div>
       <Card className="relative col-span-2 flex flex-col gap-0 p-0">
