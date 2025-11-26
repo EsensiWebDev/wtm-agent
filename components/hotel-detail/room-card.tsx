@@ -107,7 +107,7 @@ export default function RoomCard({ room }: { room: RoomType }) {
       icon: room.is_smoking_room ? "CigaretteOff" : "Cigarette",
       text: room.is_smoking_room ? "Non Smoking" : "Smoking",
     },
-    { icon: "Bed", text: `${room.bed_types.join(", ")}` },
+    { icon: "Bed", text: `${room.bed_types?.join(", ")}` },
   ];
 
   return (
