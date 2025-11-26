@@ -207,6 +207,8 @@ const dateRangeParser = createParser({
 
 const DateRangePicker = () => {
   const today = new Date();
+  // Set today to start of day (midnight) for accurate comparison
+  today.setHours(0, 0, 0, 0);
   const tomorrow = addDays(today, 1);
 
   const [{ from, to }, setDateRange] = useQueryStates({
@@ -254,6 +256,10 @@ const DateRangePicker = () => {
                 to: dateRange.to ? new Date(dateRange.to) : undefined,
               });
             }
+          }}
+          disabled={(date) => {
+            // Disable dates before today
+            return date < today;
           }}
           className="rounded-lg border shadow-sm"
         />

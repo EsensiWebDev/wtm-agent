@@ -11,6 +11,10 @@ import { CalendarIcon, ChevronsUpDown } from "lucide-react";
 import { format } from "date-fns/format";
 
 export default function DateRangePicker() {
+  const today = new Date();
+  // Set today to start of day (midnight) for accurate comparison
+  today.setHours(0, 0, 0, 0);
+
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: new Date(2025, 5, 9),
     to: new Date(2025, 5, 26),
@@ -23,14 +27,14 @@ export default function DateRangePicker() {
           variant={"outline"}
           className={cn(
             "justify-start text-left font-normal",
-            !dateRange?.from && "text-muted-foreground"
+            !dateRange?.from && "text-muted-foreground",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from && dateRange?.to ? (
             `${format(dateRange.from, "MMM d, yyyy")} - ${format(
               dateRange.to,
-              "MMM d, yyyy"
+              "MMM d, yyyy",
             )}`
           ) : (
             <span>Select Period</span>
@@ -44,6 +48,10 @@ export default function DateRangePicker() {
           defaultMonth={dateRange?.from}
           selected={dateRange}
           onSelect={setDateRange}
+          disabled={(date) => {
+            // Disable dates before today
+            return date < today;
+          }}
           className="rounded-lg border shadow-sm"
         />
       </PopoverContent>
