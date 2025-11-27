@@ -123,7 +123,7 @@ const GalleryDialog: React.FC<GalleryDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto bg-white px-4 sm:max-w-7xl sm:px-8">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto bg-white px-4 sm:max-w-5xl sm:px-8">
         <DialogHeader>
           <DialogTitle className="text-left text-lg font-bold sm:text-2xl">
             {hotelName} Gallery
@@ -136,7 +136,7 @@ const GalleryDialog: React.FC<GalleryDialogProps> = ({
               <CarouselContent>
                 {images.map((photo, index) => (
                   <CarouselItem key={index}>
-                    <div className="relative aspect-[16/10] overflow-hidden rounded-lg sm:aspect-[16/9]">
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-lg sm:aspect-[16/9]">
                       <ImageWithFallback
                         src={photo}
                         alt={`${hotelName} - Image ${index + 1}`}
